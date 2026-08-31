@@ -1,0 +1,9 @@
+# Nothing is actually ignored in this demo, so the full proposed structure is visible.
+# In the real repo, these would be gitignored:
+#   .mount-config.local.sh          (per-user local state)
+#   CLAUDE.local.md / **/CLAUDE.local.md
+#   ref/                            (shared reference clones)
+#   mnt/                            (sshfs mount points)
+#   displaced_leptons/displaced_leptons/         (separate git repo)
+#   displaced_leptons/DisplacedLeptonsSupplement/ (separate git repo)
+#   <same pattern for each other analysis's child repo(s)>
