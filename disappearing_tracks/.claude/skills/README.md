@@ -1,5 +1,3 @@
-(SCAFFOLD -- outline only)
-
 Analysis-specific skills go here.
 
 - `disapptrks-track-diagnostics/` -- run, plot, and interpret DisappTrks_Nano
@@ -29,12 +27,20 @@ Analysis-specific skills go here.
   systematic in the dissertation reference PDF -- flagged explicitly in the
   skill rather than assumed. Distinct from `disapptrks-track-diagnostics`,
   which covers that same mode's optional compact signal dE/dx histograms.
-- `disapptrks-lpc-execution/` -- the execution layer the other four skills
-  above lack: actually SSH into the LPC, confirm the grid proxy, enter the
-  `./shell` Apptainer container, run the job in tmux, and check on/collect
-  results, rather than just stating the command. Builds on the root
-  `lpc-remote-session` skill for the generic SSH/proxy/tmux mechanics and
-  `setup_lpc.sh`'s newly-added `$DISAPPTRKS_NANO_DIR` export (see
+- `disapptrks-job-submission/` -- answers "what's the exact command": the
+  `DISAPPTRKS_CATEGORY_MODE`/dataset-JSON/env-var/executor shape for any
+  PocketCoffea job (Pveto, Poffline/Pmiss, fake-track control regions,
+  fiducial maps, signal acceptance, high-purity study, Z-sideband skim, tau
+  trigger probability), with a confidence tag (CONFIRMED/REFERENCE/INFERRED)
+  per entry in `references/commands.md`. Does not cover how to actually run
+  it on the LPC -- that's `disapptrks-lpc-execution` -- or what a mode
+  measures -- that's the relevant physics skill above.
+- `disapptrks-lpc-execution/` -- the execution layer `disapptrks-job-submission`
+  and the physics skills above lack: actually SSH into the LPC, confirm the
+  grid proxy, enter the `./shell` Apptainer container, run the job in tmux,
+  and check on/collect results, rather than just stating the command. Builds
+  on the root `lpc-remote-session` skill for the generic SSH/proxy/tmux
+  mechanics and `setup_lpc.sh`'s `$DISAPPTRKS_NANO_DIR` export (see
   `references/environment.md`) so no personal LPC path needs to be hardcoded
   anywhere in this repo.
 
@@ -76,5 +82,5 @@ Analysis-specific skills go here.
 For how `pocket_coffea/config.py`/`workflow.py` code in `DisappTrks_Nano` should
 itself be written (cuts, categories, histograms, weights) -- as opposed to which
 mode/CLI command to run -- see the root `pocketcoffea-conventions` skill, cross-linked
-from all four analysis skills above. Its `ref/PocketCoffea` clone lives alongside the
-other three in the table in this analysis's `CLAUDE.md`.
+from the physics skills above. Its `ref/PocketCoffea` clone lives in the reference-clone
+table in this analysis's `CLAUDE.md`.

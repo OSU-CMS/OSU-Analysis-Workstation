@@ -1,5 +1,3 @@
-(SCAFFOLD -- outline only)
-
 Generic, tool-focused skills only:
 
 - `lpc-eos` -- EOS storage on the FNAL LPC (listing/copying via the xrootd
