@@ -1,0 +1,10 @@
+{
+  "tool_calls": {
+    "Bash": 4,
+    "Skill": 1,
+    "Write": 2
+  },
+  "total_tool_calls": 7,
+  "total_steps": 6,
+  "errors_encountered": 0
+}

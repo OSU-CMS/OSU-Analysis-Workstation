@@ -1,0 +1,63 @@
+{
+  "expectations": [
+    {
+      "text": "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+      "passed": true,
+      "evidence": "Quotes the actual Sec. 7.3 selection list (pT, isolation, hits) with no isHighPurityTrack entry, and states 'a cut that was never applied has nothing for a systematic to be computed on'"
+    },
+    {
+      "text": "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+      "passed": true,
+      "evidence": "Quotes disappearing_tracks/CLAUDE.md directly: 'We are evaluating whether to add the isHighPurityTrack requirement ... It is not part of the selection today'"
+    },
+    {
+      "text": "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+      "passed": true,
+      "evidence": "Lists the sideband dE/dx study, the signal-acceptance cutflow, and the fake-track yield estimate as the three actual workstreams that should decide this"
+    },
+    {
+      "text": "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it",
+      "passed": true,
+      "evidence": "'Bottom line: don't read the dissertation's silence as the group having considered and rejected highPurity'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 1,
+      "Bash": 9,
+      "Write": 2
+    },
+    "total_tool_calls": 12,
+    "total_steps": 10,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "The dissertation's Sec. 7.3 selection is pT > 50 GeV, isolation < 0.05*pT, >=5 tracker hits, no missing inner/middle hits, with no isHighPurityTrack",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Response states it opened DissertationFinal.pdf directly and quotes this list; consistent with content read earlier in this project session"
+    },
+    {
+      "claim": "Every entry in the dissertation's systematics chapter corresponds to a cut actually applied in the selection (missing hits, calo energy, JES/JER/MET, trigger, fake-track zeta)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches the table structure documented earlier in this project's disapptrks-lepton-backgrounds and disapptrks-fake-track-background physics-background references, built from the same dissertation"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "All 4 expectations pass. Correctness parity with the with-skill run, at roughly 2.5x the time and ~28% more tokens -- this baseline had to independently reopen and read the dissertation PDF to reach the same conclusion the skill already had pre-digested."
+  }
+}

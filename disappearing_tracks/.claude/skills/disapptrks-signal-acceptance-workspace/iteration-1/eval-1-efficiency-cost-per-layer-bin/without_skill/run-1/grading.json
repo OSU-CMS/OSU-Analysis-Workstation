@@ -1,0 +1,78 @@
+{
+  "expectations": [
+    {
+      "text": "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+      "passed": true,
+      "evidence": "'This repo ... already has a purpose-built mode for exactly this comparison', citing pocket_coffea/cuts.py and config.py directly"
+    },
+    {
+      "text": "Mentions the summarize-signal-high-purity CLI command",
+      "passed": true,
+      "evidence": "'disapptrks summarize-signal-high-purity <coffea files> --sample <sample> --full-cutflow'"
+    },
+    {
+      "text": "Reports a breakdown by layer bin (at least 3 of NLayers4/5/6plus/combined), not only one aggregate number",
+      "passed": true,
+      "evidence": "Names NLayers4, NLayers5, NLayers6plus, combinedBins and the combined/4-layer/5-layer/>=6-layer table shape"
+    },
+    {
+      "text": "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+      "passed": true,
+      "evidence": "Both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON required in the example command; explicit note that this 'matters here'"
+    },
+    {
+      "text": "Does not state specific numeric efficiency-loss percentages as if from a completed run",
+      "passed": true,
+      "evidence": "'I don't have a real number for you yet ... anything I typed there would be invented'; explicitly declines to reuse suspicious pre-existing .txt files that resemble output"
+    },
+    {
+      "text": "Does not attempt to actually SSH into a remote host or run a real command against LPC",
+      "passed": true,
+      "evidence": "Step 5 explicitly states it did not attempt SSH/remote execution and points to the disapptrks-lpc-execution skill for that step instead"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 21,
+      "Read": 2,
+      "Write": 2
+    },
+    "total_tool_calls": 25,
+    "total_steps": 18,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "Five .txt files in ref/DisappTrks_Nano/docs/ resemble summarize-signal-high-purity output but are untracked/unverifiable",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Response gives specific reasons: untracked in git, mismatched row label vs. current CLI wording, smoke-test-scale stats, no run-period metadata"
+    },
+    {
+      "claim": "highPurity acceptance loss should be expected largest in the 4-layer bin",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Explicitly labeled by the response itself as 'a hypothesis, not a result' -- not something this run verified"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Physically-motivated expectation about which layer bin loses the most acceptance is explicitly unverified"
+    ],
+    "needs_review": [
+      "No real 2022EFG chargino dataset JSON exists -- only a single-file mass-700 smoke sample",
+      "Unclear which EOS path holds the real 2022EFG chargino signal samples"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "This baseline run independently reconstructed everything the skill states (mode, CLI, layer bins, fiducial-map requirement) directly from the source, and went further by flagging suspicious untracked files the with-skill run didn't mention. It took roughly 3x longer and ~38% more tokens to get there (458.9s / 84k tokens vs. 150.1s / 61k tokens for the with-skill run) -- see the sibling grading.json's eval_feedback for the resulting suggestion about this eval's discriminating power."
+  }
+}

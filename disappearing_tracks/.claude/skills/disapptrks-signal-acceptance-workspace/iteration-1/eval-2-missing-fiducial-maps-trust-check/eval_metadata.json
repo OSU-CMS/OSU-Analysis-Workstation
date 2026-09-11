@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "missing-fiducial-maps-trust-check",
+  "prompt": "I ran DISAPPTRKS_CATEGORY_MODE=signal_acceptance last week for our AMSB signal but I don't think I set DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1. Can I trust the summarize-signal-high-purity output for deciding on highPurity?",
+  "assertions": [
+    "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+    "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+    "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+    "Does not simply answer 'yes, you can trust it' without qualification"
+  ]
+}

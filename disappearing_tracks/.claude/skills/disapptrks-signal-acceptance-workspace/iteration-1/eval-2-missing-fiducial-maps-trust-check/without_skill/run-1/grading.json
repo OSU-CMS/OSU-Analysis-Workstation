@@ -1,0 +1,73 @@
+{
+  "expectations": [
+    {
+      "text": "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+      "passed": true,
+      "evidence": "'maybe not, and the summarize-signal-high-purity output itself can't tell you either way'"
+    },
+    {
+      "text": "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+      "passed": true,
+      "evidence": "'I'd just rerun signal_acceptance with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 and both *_FIDUCIAL_MAP_JSON paths set, per the documented command'"
+    },
+    {
+      "text": "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+      "passed": true,
+      "evidence": "DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON both named repeatedly, plus DISAPPTRKS_FIDUCIAL_MAP_DIR as an alternative"
+    },
+    {
+      "text": "Does not simply answer 'yes, you can trust it' without qualification",
+      "passed": true,
+      "evidence": "Explicit 'Bottom line: don't treat last week's ... numbers as decision-ready until you've confirmed ... that the electron and muon fiducial maps actually loaded'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 10,
+      "Read": 5,
+      "Write": 2
+    },
+    "total_tool_calls": 17,
+    "total_steps": 16,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 is only a fail-loud guard, independent of whether the map paths are actually loaded",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Traced directly in pocket_coffea/workflow.py; matches the with-skill run's independent conclusion"
+    },
+    {
+      "claim": "The --full-cutflow 'track_fiducialECAL' row is a different, static branch (isFiducialECALTrack) unrelated to the dynamic lepton fiducial maps, so no existing diagnostic reveals whether the maps loaded",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Explicitly traced through workflow.py and explained as the reason the output alone can't answer the question -- not mentioned in the with-skill run"
+    },
+    {
+      "claim": "Grepping the job's stdout for 'fiducial-map hot spot(s)' is a way to check after the fact",
+      "type": "process",
+      "verified": false,
+      "evidence": "Plausible given the described print statement in the loader, but not independently confirmed by re-reading the exact print format in this grading pass"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This baseline found a genuine gap the packaged skill doesn't currently cover (see claim #2) -- the skill's invariant about requiring fiducial maps doesn't mention that the printed cutflow has no row that actually reveals whether they loaded. Worth folding into the skill directly rather than leaving it to be rediscovered each time."
+      }
+    ],
+    "overall": "All 4 expectations pass, and this run's investigation was arguably more complete than the with-skill run for this eval -- it took roughly 2.1x longer and ~29% more tokens to get there (252.0s / 67k tokens vs. 119.3s / 52k tokens)."
+  }
+}

@@ -1,0 +1,332 @@
+{
+  "metadata": {
+    "skill_name": "disapptrks-signal-acceptance",
+    "skill_path": "disappearing_tracks/.claude/skills/disapptrks-signal-acceptance",
+    "executor_model": "claude-sonnet-5",
+    "analyzer_model": "claude-sonnet-5",
+    "timestamp": "2026-09-01T18:28:30Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 150.085,
+        "tokens": 61047,
+        "tool_calls": 25,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+          "passed": true,
+          "evidence": "'This is exactly what the signal_acceptance PocketCoffea category mode in DisappTrks_Nano ... is built to measure'"
+        },
+        {
+          "text": "Mentions the summarize-signal-high-purity CLI command",
+          "passed": true,
+          "evidence": "Full command block: 'disapptrks summarize-signal-high-purity ... --full-cutflow'"
+        },
+        {
+          "text": "Reports a breakdown by layer bin (at least 3 of NLayers4/5/6plus/combined), not only one aggregate number",
+          "passed": true,
+          "evidence": "Names all four: NLayers4, NLayers5, NLayers6plus, combinedBins, and 'one row per layer bin (combined, 4 layers, 5 layers, >=6 layers)'"
+        },
+        {
+          "text": "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+          "passed": true,
+          "evidence": "Step 2 requires both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON; step 4 says to confirm both nElectronFiducialHotSpotsLoaded and nMuonFiducialHotSpotsLoaded are nonzero"
+        },
+        {
+          "text": "Does not state specific numeric efficiency-loss percentages as if from a completed run",
+          "passed": true,
+          "evidence": "Opens with 'I don't have a number to give you yet ... I'm not going to invent one'"
+        },
+        {
+          "text": "Does not attempt to actually SSH into a remote host or run a real command against LPC",
+          "passed": true,
+          "evidence": "Only prints example commands with placeholder executor iterative; no SSH or remote execution attempted"
+        }
+      ],
+      "notes": [
+        "No real 2022EFG chargino dataset JSON exists yet -- only a single-file mass-700 smoke sample"
+      ],
+      "eval_name": "efficiency-cost-per-layer-bin"
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 119.326,
+        "tokens": 51844,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+          "passed": true,
+          "evidence": "'not automatically -- you need to check the output before trusting it, and there's a real chance the run doesn't reflect the production selection'"
+        },
+        {
+          "text": "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+          "passed": true,
+          "evidence": "'rerun with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 and both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON/DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON pointed at valid maps' (conditional on the hot-spot check coming back zero) plus a general 'always pass' recommendation"
+        },
+        {
+          "text": "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+          "passed": true,
+          "evidence": "nElectronFiducialHotSpotsLoaded and nMuonFiducialHotSpotsLoaded both named and checked explicitly"
+        },
+        {
+          "text": "Does not simply answer 'yes, you can trust it' without qualification",
+          "passed": true,
+          "evidence": "Gives a conditional two-branch answer depending on the hot-spot counter check, not a flat yes"
+        }
+      ],
+      "notes": [],
+      "eval_name": "missing-fiducial-maps-trust-check"
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 58.638,
+        "tokens": 38686,
+        "tool_calls": 7,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+          "passed": true,
+          "evidence": "'the isHighPurityTrack requirement was not part of the disappearing-track selection at the time that dissertation was written. You can't have a systematic uncertainty entry for a cut that isn't in the selection'"
+        },
+        {
+          "text": "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+          "passed": true,
+          "evidence": "Quotes disappearing_tracks/CLAUDE.md's 'Current investigation' section directly: 'It is not part of the selection today ... an open, live question'"
+        },
+        {
+          "text": "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+          "passed": true,
+          "evidence": "Explicitly lists sideband discrimination (disapptrks-track-diagnostics), fake yield (disapptrks-fake-track-background), and signal efficiency cost (disapptrks-signal-acceptance) as the real tradeoff"
+        },
+        {
+          "text": "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it",
+          "passed": true,
+          "evidence": "'Bottom line: don't read the dissertation's silence as a prior verdict against highPurity'"
+        }
+      ],
+      "notes": [],
+      "eval_name": "dissertation-silence-not-rejection"
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 458.927,
+        "tokens": 84302,
+        "tool_calls": 25,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+          "passed": true,
+          "evidence": "'This repo ... already has a purpose-built mode for exactly this comparison', citing pocket_coffea/cuts.py and config.py directly"
+        },
+        {
+          "text": "Mentions the summarize-signal-high-purity CLI command",
+          "passed": true,
+          "evidence": "'disapptrks summarize-signal-high-purity <coffea files> --sample <sample> --full-cutflow'"
+        },
+        {
+          "text": "Reports a breakdown by layer bin (at least 3 of NLayers4/5/6plus/combined), not only one aggregate number",
+          "passed": true,
+          "evidence": "Names NLayers4, NLayers5, NLayers6plus, combinedBins and the combined/4-layer/5-layer/>=6-layer table shape"
+        },
+        {
+          "text": "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+          "passed": true,
+          "evidence": "Both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON required in the example command; explicit note that this 'matters here'"
+        },
+        {
+          "text": "Does not state specific numeric efficiency-loss percentages as if from a completed run",
+          "passed": true,
+          "evidence": "'I don't have a real number for you yet ... anything I typed there would be invented'; explicitly declines to reuse suspicious pre-existing .txt files that resemble output"
+        },
+        {
+          "text": "Does not attempt to actually SSH into a remote host or run a real command against LPC",
+          "passed": true,
+          "evidence": "Step 5 explicitly states it did not attempt SSH/remote execution and points to the disapptrks-lpc-execution skill for that step instead"
+        }
+      ],
+      "notes": [
+        "Physically-motivated expectation about which layer bin loses the most acceptance is explicitly unverified",
+        "No real 2022EFG chargino dataset JSON exists -- only a single-file mass-700 smoke sample",
+        "Unclear which EOS path holds the real 2022EFG chargino signal samples"
+      ],
+      "eval_name": "efficiency-cost-per-layer-bin"
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 251.993,
+        "tokens": 67079,
+        "tool_calls": 17,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+          "passed": true,
+          "evidence": "'maybe not, and the summarize-signal-high-purity output itself can't tell you either way'"
+        },
+        {
+          "text": "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+          "passed": true,
+          "evidence": "'I'd just rerun signal_acceptance with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 and both *_FIDUCIAL_MAP_JSON paths set, per the documented command'"
+        },
+        {
+          "text": "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+          "passed": true,
+          "evidence": "DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON both named repeatedly, plus DISAPPTRKS_FIDUCIAL_MAP_DIR as an alternative"
+        },
+        {
+          "text": "Does not simply answer 'yes, you can trust it' without qualification",
+          "passed": true,
+          "evidence": "Explicit 'Bottom line: don't treat last week's ... numbers as decision-ready until you've confirmed ... that the electron and muon fiducial maps actually loaded'"
+        }
+      ],
+      "notes": [],
+      "eval_name": "missing-fiducial-maps-trust-check"
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 146.51,
+        "tokens": 49715,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+          "passed": true,
+          "evidence": "Quotes the actual Sec. 7.3 selection list (pT, isolation, hits) with no isHighPurityTrack entry, and states 'a cut that was never applied has nothing for a systematic to be computed on'"
+        },
+        {
+          "text": "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+          "passed": true,
+          "evidence": "Quotes disappearing_tracks/CLAUDE.md directly: 'We are evaluating whether to add the isHighPurityTrack requirement ... It is not part of the selection today'"
+        },
+        {
+          "text": "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+          "passed": true,
+          "evidence": "Lists the sideband dE/dx study, the signal-acceptance cutflow, and the fake-track yield estimate as the three actual workstreams that should decide this"
+        },
+        {
+          "text": "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it",
+          "passed": true,
+          "evidence": "'Bottom line: don't read the dissertation's silence as the group having considered and rejected highPurity'"
+        }
+      ],
+      "notes": [],
+      "eval_name": "dissertation-silence-not-rejection"
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 109.3497,
+        "stddev": 46.5326,
+        "min": 58.638,
+        "max": 150.085
+      },
+      "tokens": {
+        "mean": 50525.6667,
+        "stddev": 11238.6424,
+        "min": 38686,
+        "max": 61047
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 285.81,
+        "stddev": 158.9301,
+        "min": 146.51,
+        "max": 458.927
+      },
+      "tokens": {
+        "mean": 67032.0,
+        "stddev": 17293.5479,
+        "min": 49715,
+        "max": 84302
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "-176.5",
+      "tokens": "-16506"
+    }
+  },
+  "notes": [
+    "Pass rate is 100% for both with_skill and without_skill on all 3 evals -- these assertions don't discriminate correctness for this skill. A capable general-purpose agent with full repo access reconstructs the same commands, invariants, and framing directly from the code (pocket_coffea/workflow.py, cuts.py) and repo docs (disappearing_tracks/CLAUDE.md) that the skill also draws from.",
+    "The real, consistent signal is efficiency: with_skill averaged 109.3s / 50.5k tokens vs. 285.8s / 67.0k tokens without_skill -- roughly 2.6x faster and 25% fewer tokens, holding across all 3 evals individually, not just in aggregate.",
+    "Eval 3 (dissertation-silence-not-rejection) shows the largest efficiency gap (58.6s vs 146.5s, ~2.5x) because the skill's own 'Why this mode exists right now' section already contains the dissertation citation pre-digested; the baseline had to independently open and grep the actual DissertationFinal.pdf to reach the same conclusion.",
+    "Both without_skill runs for eval 2 (missing-fiducial-maps-trust-check) independently discovered something neither the with_skill run nor the packaged skill currently states: the --full-cutflow output's 'track_fiducialECAL' row is a different, static branch (isFiducialECALTrack) unrelated to the dynamic lepton fiducial-map veto, so there is no existing diagnostic that reveals whether the maps actually loaded. Worth adding to the skill's troubleshooting content.",
+    "Both without_skill runs for eval 1 independently flagged the same real-world gaps in the actual checkout: no muon fiducial map file exists at all, and the electron map is named without the '_v2' suffix the docs/skill examples use. This is a genuine blocker for actually running signal_acceptance today, not an eval artifact.",
+    "Recommendation for a future iteration: either raise the difficulty of these 3 evals (test something only the skill's authored content captures, not the underlying code/docs) or add efficiency thresholds as the primary pass/fail signal, since correctness parity with a thorough baseline is expected whenever the underlying repo is this well-documented."
+  ]
+}

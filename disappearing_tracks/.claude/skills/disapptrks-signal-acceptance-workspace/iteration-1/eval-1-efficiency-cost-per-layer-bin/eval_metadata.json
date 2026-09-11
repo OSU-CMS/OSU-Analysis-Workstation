@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "efficiency-cost-per-layer-bin",
+  "prompt": "We're thinking about adding the highPurity requirement to the disappearing track selection. Can you tell me how much signal efficiency we'd lose in each layer bin for the 2022EFG chargino samples, and how you'd actually go about finding that out?",
+  "assertions": [
+    "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+    "Mentions the summarize-signal-high-purity CLI command",
+    "Reports a breakdown by layer bin (mentions at least 3 of: NLayers4, NLayers5, NLayers6plus/6+, combined), not only one aggregate number",
+    "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+    "Does not state specific numeric efficiency-loss percentages as if from a completed run (none was run)",
+    "Does not attempt to actually SSH into a remote host or run a real command against LPC"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "expectations": [
+    {
+      "text": "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+      "passed": true,
+      "evidence": "'the isHighPurityTrack requirement was not part of the disappearing-track selection at the time that dissertation was written. You can't have a systematic uncertainty entry for a cut that isn't in the selection'"
+    },
+    {
+      "text": "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+      "passed": true,
+      "evidence": "Quotes disappearing_tracks/CLAUDE.md's 'Current investigation' section directly: 'It is not part of the selection today ... an open, live question'"
+    },
+    {
+      "text": "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+      "passed": true,
+      "evidence": "Explicitly lists sideband discrimination (disapptrks-track-diagnostics), fake yield (disapptrks-fake-track-background), and signal efficiency cost (disapptrks-signal-acceptance) as the real tradeoff"
+    },
+    {
+      "text": "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it",
+      "passed": true,
+      "evidence": "'Bottom line: don't read the dissertation's silence as a prior verdict against highPurity'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 4,
+      "Skill": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 7,
+    "total_steps": 6,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "The dissertation's Ch. 7.5.4 lists pileup, missing hits, ISR, JES/JER, MET, calo energy, lepton-veto SF, trigger efficiency, and track reconstruction efficiency, with no highPurity entry",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches the disapptrks-signal-acceptance skill's own documented citation of this chapter, and the baseline run's independent citation of the same chapter's table contents"
+    },
+    {
+      "claim": "No separate dissertation file needed to be reopened; the citation is sufficient as embedded skill knowledge",
+      "type": "process",
+      "verified": true,
+      "evidence": "Response's own summary states this explicitly; consistent with the skill's references/physics-background.md and signal-acceptance SKILL.md already containing this citation"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This is the eval with the largest efficiency gap (7 tool calls / 6 steps / 58.6s / 38.7k tokens here vs. 12 tool calls / 10 steps / 146.5s / 49.7k tokens for the baseline), because the answer is mostly already pre-digested in the skill's own 'Why this mode exists right now' section and CLAUDE.md -- the baseline had to independently open and grep the actual dissertation PDF to reach the same conclusion. This is a good example of the skill paying for itself even though correctness parity holds."
+      }
+    ],
+    "overall": "All 4 expectations pass. This is the clearest efficiency win of the three evals -- roughly 2.5x faster with the skill, for an identical correctness outcome."
+  }
+}

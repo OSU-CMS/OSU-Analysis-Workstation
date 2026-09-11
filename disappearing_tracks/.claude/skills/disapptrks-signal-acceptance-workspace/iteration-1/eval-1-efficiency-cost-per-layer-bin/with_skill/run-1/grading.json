@@ -1,0 +1,86 @@
+{
+  "expectations": [
+    {
+      "text": "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+      "passed": true,
+      "evidence": "'This is exactly what the signal_acceptance PocketCoffea category mode in DisappTrks_Nano ... is built to measure'"
+    },
+    {
+      "text": "Mentions the summarize-signal-high-purity CLI command",
+      "passed": true,
+      "evidence": "Full command block: 'disapptrks summarize-signal-high-purity ... --full-cutflow'"
+    },
+    {
+      "text": "Reports a breakdown by layer bin (at least 3 of NLayers4/5/6plus/combined), not only one aggregate number",
+      "passed": true,
+      "evidence": "Names all four: NLayers4, NLayers5, NLayers6plus, combinedBins, and 'one row per layer bin (combined, 4 layers, 5 layers, >=6 layers)'"
+    },
+    {
+      "text": "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+      "passed": true,
+      "evidence": "Step 2 requires both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON and DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON; step 4 says to confirm both nElectronFiducialHotSpotsLoaded and nMuonFiducialHotSpotsLoaded are nonzero"
+    },
+    {
+      "text": "Does not state specific numeric efficiency-loss percentages as if from a completed run",
+      "passed": true,
+      "evidence": "Opens with 'I don't have a number to give you yet ... I'm not going to invent one'"
+    },
+    {
+      "text": "Does not attempt to actually SSH into a remote host or run a real command against LPC",
+      "passed": true,
+      "evidence": "Only prints example commands with placeholder executor iterative; no SSH or remote execution attempted"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Skill": 1,
+      "Bash": 20,
+      "Read": 2,
+      "Write": 2
+    },
+    "total_tool_calls": 25,
+    "total_steps": 13,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "No muon fiducial map file exists anywhere in the checkout",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Consistent with independent finding in the baseline run for the same eval"
+    },
+    {
+      "claim": "The electron map present is named electron_fiducial_map_2022EFG.json, not the _v2 naming used in docs",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Consistent with baseline run's independent check"
+    },
+    {
+      "claim": "ref/DisappTrks_Nano is still on branch MattDev",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Matches disappearing_tracks/CLAUDE.md's own note, and the response says it re-confirmed this directly"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [
+      "No real 2022EFG chargino dataset JSON exists yet -- only a single-file mass-700 smoke sample"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This assertion set doesn't discriminate: the without_skill baseline for this same eval independently found the signal_acceptance mode, the summarize-signal-high-purity command, all four layer bins, and the fiducial-map requirement, and also declined to fabricate numbers -- it passes all 6 expectations too. The real observed difference between with/without skill on this eval is efficiency (25 tool calls/13 steps/61k tokens/150s vs. 25 tool calls/18 steps/84k tokens/459s), not correctness. Future evals for this skill should either use harder prompts a capable agent can't reconstruct purely by reading the code (e.g. the exact stage-name table, or a CartesianSelection debugging scenario), or explicitly track time/token efficiency as the primary signal rather than pass/fail correctness."
+      }
+    ],
+    "overall": "All 6 expectations pass, but they don't discriminate this skill's value on this prompt -- see suggestion above. The skill's real advantage on this eval was speed/cost, not enabling a correct answer that was otherwise unreachable."
+  }
+}

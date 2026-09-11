@@ -1,0 +1,11 @@
+{
+  "eval_id": 3,
+  "eval_name": "dissertation-silence-not-rejection",
+  "prompt": "Our dissertation's systematics chapter doesn't mention highPurity at all -- does that mean we shouldn't bother adding it, since it's not an established systematic?",
+  "assertions": [
+    "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+    "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+    "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+    "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it"
+  ]
+}

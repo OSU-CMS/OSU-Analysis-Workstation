@@ -1,0 +1,68 @@
+{
+  "expectations": [
+    {
+      "text": "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+      "passed": true,
+      "evidence": "'not automatically -- you need to check the output before trusting it, and there's a real chance the run doesn't reflect the production selection'"
+    },
+    {
+      "text": "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+      "passed": true,
+      "evidence": "'rerun with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 and both DISAPPTRKS_ELECTRON_FIDUCIAL_MAP_JSON/DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON pointed at valid maps' (conditional on the hot-spot check coming back zero) plus a general 'always pass' recommendation"
+    },
+    {
+      "text": "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+      "passed": true,
+      "evidence": "nElectronFiducialHotSpotsLoaded and nMuonFiducialHotSpotsLoaded both named and checked explicitly"
+    },
+    {
+      "text": "Does not simply answer 'yes, you can trust it' without qualification",
+      "passed": true,
+      "evidence": "Gives a conditional two-branch answer depending on the hot-spot counter check, not a flat yes"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Skill": 1,
+      "Bash": 6,
+      "Read": 3,
+      "Write": 2
+    },
+    "total_tool_calls": 12,
+    "total_steps": 9,
+    "errors_encountered": 0
+  },
+  "claims": [
+    {
+      "claim": "DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 is a fail-loud guard, not the switch that enables fiducial masking",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Cites _load_fiducial_hot_spots() in pocket_coffea/workflow.py around line 165; confirmed independently by the baseline run for this same eval reaching the identical conclusion"
+    },
+    {
+      "claim": "The nElectronFiducialHotSpotsLoaded/nMuonFiducialHotSpotsLoaded check is the same one used in the lepton-background skill's troubleshooting doc",
+      "type": "process",
+      "verified": true,
+      "evidence": "This matches disapptrks-lepton-backgrounds/references/troubleshooting.md's 'Fiducial map has no effect' section built earlier in this project"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "The baseline run for this eval reached the same conclusion and additionally found something this with-skill run did not surface: the --full-cutflow output's 'track_fiducialECAL' row is a different, static NanoAOD branch (isFiducialECALTrack) unrelated to the dynamic lepton hot-spot maps, meaning there is no existing diagnostic row that reveals whether the maps loaded. That's a real gap in the disapptrks-signal-acceptance skill's own guidance worth adding."
+      }
+    ],
+    "overall": "All 4 expectations pass. The skill correctly steered the agent to the right invariant and check, but the baseline run (see its own grading.json) went one level deeper into the code and found a genuine documentation gap the skill should incorporate."
+  }
+}

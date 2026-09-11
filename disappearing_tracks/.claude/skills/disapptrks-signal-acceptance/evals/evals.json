@@ -1,0 +1,46 @@
+{
+  "skill_name": "disapptrks-signal-acceptance",
+  "evals": [
+    {
+      "id": 1,
+      "name": "efficiency-cost-per-layer-bin",
+      "prompt": "We're thinking about adding the highPurity requirement to the disappearing track selection. Can you tell me how much signal efficiency we'd lose in each layer bin for the 2022EFG chargino samples, and how you'd actually go about finding that out?",
+      "expected_output": "Identifies the signal_acceptance PocketCoffea mode and the summarize-signal-high-purity CLI command (with --full-cutflow) as the way to answer this. Reports the answer per layer bin (4/5/6+/combined), not just one aggregate number. Requires/mentions both electron and muon fiducial maps for a production-representative comparison. Does not fabricate a numeric answer since no job has actually been run -- proposes the concrete steps/commands instead.",
+      "files": [],
+      "expectations": [
+        "Identifies the signal_acceptance PocketCoffea category mode as the way to measure this",
+        "Mentions the summarize-signal-high-purity CLI command",
+        "Reports a breakdown by layer bin (mentions at least 3 of: NLayers4, NLayers5, NLayers6plus/6+, combined), not only one aggregate number",
+        "Mentions requiring both electron and muon fiducial maps for the comparison to be production-representative",
+        "Does not state specific numeric efficiency-loss percentages as if from a completed run (none was run)",
+        "Does not attempt to actually SSH into a remote host or run a real command against LPC"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "missing-fiducial-maps-trust-check",
+      "prompt": "I ran DISAPPTRKS_CATEGORY_MODE=signal_acceptance last week for our AMSB signal but I don't think I set DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1. Can I trust the summarize-signal-high-purity output for deciding on highPurity?",
+      "expected_output": "Flags that the comparison doesn't match the production search selection without both fiducial maps loaded, and recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1 and both electron/muon maps rather than trusting the existing output as-is.",
+      "files": [],
+      "expectations": [
+        "States that the existing output should not be fully trusted / is not production-representative without fiducial maps",
+        "Recommends rerunning with DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS=1",
+        "Mentions both electron and muon fiducial maps are needed, not just one map generically",
+        "Does not simply answer 'yes, you can trust it' without qualification"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "dissertation-silence-not-rejection",
+      "prompt": "Our dissertation's systematics chapter doesn't mention highPurity at all -- does that mean we shouldn't bother adding it, since it's not an established systematic?",
+      "expected_output": "Correctly explains the absence is because highPurity isn't part of the selection yet (so it couldn't appear as a systematic on it), and frames this as a live, currently undecided investigation (tradeoff between fake-track background reduction and signal efficiency cost) rather than concluding from the dissertation's silence that highPurity shouldn't be added.",
+      "files": [],
+      "expectations": [
+        "Explains that highPurity is not currently part of the disappearing-track selection, which is why it doesn't appear as a systematic in the dissertation",
+        "Frames the highPurity question as a live/ongoing/undecided investigation, not settled analysis content",
+        "Connects the question to the tradeoff between fake-track background reduction and signal-acceptance cost",
+        "Does not conclude that highPurity shouldn't be added because the dissertation doesn't mention it"
+      ]
+    }
+  ]
+}
