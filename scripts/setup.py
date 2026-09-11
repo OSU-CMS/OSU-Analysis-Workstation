@@ -64,6 +64,32 @@ def clone_if_missing(url: str, dest: Path) -> None:
     subprocess.run(["git", "clone", url, str(dest)], check=True)
 
 
+def _find_cmslpc_username(text: str) -> str | None:
+    """Find the ``User`` value from the first Host block whose pattern mentions
+    cmslpc, scoped strictly to that one block (up to but not including the next
+    ``Host`` line).
+
+    A single regex spanning the whole file (the previous approach) is a trap here:
+    with DOTALL a greedy ``.*cmslpc`` locks onto the *last* ``cmslpc`` occurrence
+    in the file, not the first, and a lazy scan from there for the next ``User``
+    line can land on an unrelated Host block entirely (confirmed in practice --
+    it picked up a pixel-readout testbed's username instead of the real LPC one).
+    Walking block-by-block can't wander past a block boundary like that.
+    """
+    in_cmslpc_block = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        host_match = re.match(r"(?i)^host\b(.*)$", stripped)
+        if host_match:
+            in_cmslpc_block = "cmslpc" in host_match.group(1).lower()
+            continue
+        if in_cmslpc_block:
+            user_match = re.match(r"(?i)^user\s+(\S+)", stripped)
+            if user_match:
+                return user_match.group(1)
+    return None
+
+
 def check_ssh_config() -> None:
     text = SSH_CONFIG.read_text() if SSH_CONFIG.exists() else ""
 
@@ -76,10 +102,7 @@ def check_ssh_config() -> None:
 
     # Reuse the username from an existing cmslpc-pointing Host block if one is
     # found, so the suggested snippet doesn't need a placeholder.
-    username_match = re.search(
-        r"(?ims)^host\s+.*cmslpc.*?$\n(?:.*\n)*?\s*user\s+(\S+)", text
-    )
-    username = username_match.group(1) if username_match else "<your-username>"
+    username = _find_cmslpc_username(text) or "<your-username>"
 
     print()
     if not has_lpc_alias:
