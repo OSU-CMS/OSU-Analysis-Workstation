@@ -116,3 +116,22 @@ For a job expected to take minutes to hours (a typical Dask/Condor submission), 
 sit in a tight poll loop waiting for it. Check once, report what's known, and either
 schedule a follow-up check or tell the user how to ask again -- treat it like any other
 long-running background work.
+
+**`condor_q` spans multiple schedds at the LPC -- a plain `condor_q <username>` with
+no `-name` queries whichever schedd is default for your login node, which is not
+necessarily the one your jobs actually landed on.** A real session checked
+`condor_q mjoyce` right after submitting ~26 jobs, got back "0 jobs," and concluded
+the jobs were stuck -- when in fact they were sitting exactly where expected (5200
+jobs, mostly idle) on a *different* schedd the default query never reached. Query
+every known schedd explicitly rather than trusting the unqualified default, e.g.:
+
+```bash
+for schedd in lpcschedd4.fnal.gov lpcschedd5.fnal.gov lpcschedd6.fnal.gov; do
+  ssh <lpc-host-alias> "condor_q -name $schedd <username> -totals"
+done
+```
+
+(`condor_q <username> -totals` with no `-name` at all also works and prints a
+per-schedd breakdown in one call -- use that first; fall back to explicit `-name`
+queries, or ask the user, if the schedd list above goes stale.) Don't declare a job
+"stuck" or "not found" from a single schedd's empty result.
