@@ -55,7 +55,7 @@ Note the `2023C` filename label vs. `2023_preBPix` year value -- read the
 year from the dataset JSON's own metadata for a new period, don't assume the
 filename label is the year value.
 
-### `muon_pveto` / `tau_mu_pveto` / `tau_ele_pveto` — INFERRED
+### `muon_pveto` / `tau_mu_pveto` / `tau_ele_pveto` — CONFIRMED
 
 Same shape as `electron_pveto` above:
 
@@ -67,20 +67,47 @@ Same shape as `electron_pveto` above:
 - `tau_ele_pveto`: same dataset as `electron_pveto` (`DATA_EGamma`), just
   `DISAPPTRKS_CATEGORY_MODE=tau_ele_pveto`.
 
-Not yet confirmed by an actual run -- smoke-test first
-(`--executor iterative --limit-files 1 --limit-chunks 1`, dropping the
-Dask/Condor flags) and update this entry to CONFIRMED once one succeeds.
+Confirmed by Matt Joyce, 2026-09-13: `muon_pveto` full run completed
+successfully for 2025 (`eos_2025_Muon_OSUv2.json`, full `--scaleout 200
+--queue workday` run, `output_all.coffea` produced). `tau_mu_pveto` and
+`tau_ele_pveto` each passed a smoke test for 2025
+(`--executor iterative --limit-files 1 --limit-chunks 1`, fiducial maps
+auto-resolved correctly for each flavor) before being submitted as full
+`--scaleout 200 --queue workday` runs.
+
+**P_veto category bug, fixed 2026-09-15 (`MattDev` commit `7c331f5`):**
+`disapptrks estimate-lepton-background`/`estimate-tau-background` (the CLI
+commands that turn these Pveto job outputs into a P_veto value, not this job
+submission itself) previously read the OS/SS pair-count histograms at the
+wrong PocketCoffea category (`variable_count_sum`'s `"inclusive"` default)
+for every one of `muon_pveto`/`electron_pveto`/`tau_mu_pveto`/`tau_ele_pveto`,
+silently zeroing P_veto's numerator/denominator regardless of the job's real
+data. Any `estimate-lepton-background`/`estimate-tau-background` output
+produced **before** this commit should be treated as unreliable and
+re-derived once the checkout is updated past `7c331f5`.
 
 ## Poffline/Pmiss (`*_pmiss_poffline`)
 
-INFERRED, per the lepton-backgrounds skill's documented pattern: same shape
-as the matching Pveto command, but `DISAPPTRKS_CATEGORY_MODE=<flavor>_pmiss_poffline`,
+Same shape as the matching Pveto command, but `DISAPPTRKS_CATEGORY_MODE=<flavor>_pmiss_poffline`,
 no `DISAPPTRKS_REQUIRE_FIDUCIAL_MAPS`/`DISAPPTRKS_ENABLE_PVETO_DIAGNOSTICS`
 (Poffline/Pmiss doesn't use fiducial maps or the Pveto diagnostic cutflow),
-and `--outputdir analysis_output/<period>/<flavor>_pmiss_poffline`. Not
-confirmed by an actual run yet.
+and `--outputdir analysis_output/<period>/<flavor>_pmiss_poffline`.
+`muon_pmiss_poffline`/`electron_pmiss_poffline` CONFIRMED (multiple full runs
+by Matt Joyce, e.g. 2022CD/2022EFG/2025 muon). `tau_pmiss_poffline` CONFIRMED
+by Matt Joyce, 2026-09-13 — smoke-tested (`DATA_Muon`,
+`--executor iterative --limit-files 1 --limit-chunks 1`) then submitted as a
+full `--scaleout 200 --queue workday` run for 2025.
 
 ## Fake-track background (`fake_tracks`)
+
+`basic`/`zmumu`/`zee` all **CONFIRMED** by Matt Joyce, 2026-09-13/2026-09-14:
+each smoke-tested (`--executor iterative --limit-files 1 --limit-chunks 1`,
+both electron and muon fiducial maps loaded correctly for every control) then
+submitted as full `--scaleout 200 --queue workday` runs -- `zmumu`/`zee` for
+2024 on 2026-09-13, `basic`/`zmumu`/`zee` for 2026 on 2026-09-13, and 2024
+`basic` on 2026-09-14 once `eos_2024_JetMET_OSUv2.json` was published (2024
+`basic` was skipped on 2026-09-13 because that dataset JSON didn't exist yet).
+2024 now has its full three-control set.
 
 ### `fake_tracks` (basic control, 2025 JetMET) — REFERENCE (shown by user, not run this session)
 
@@ -136,22 +163,29 @@ usual `--executor dask@lpc ...` block; not confirmed.
 
 ## Fiducial maps, high-purity study, Z-sideband skim, tau trigger probability
 
-INFERRED only — no confirmed or reference example captured yet for any of
-these four. `config.py` requires, at minimum:
-
 - `fiducial_maps`: `DISAPPTRKS_CATEGORY_MODE=fiducial_maps`, a `DATA_Muon` or
   `DATA_EGamma` dataset JSON, matching `DISAPPTRKS_DATASET_SAMPLE`/`YEAR`.
+  INFERRED, no confirmed run yet.
 - `high_purity_study`: `DISAPPTRKS_CATEGORY_MODE=high_purity_study` plus
   `DISAPPTRKS_FAKE_TRACK_CONTROL=zmumu` or `zee` (required -- the mode
   raises otherwise); optionally `DISAPPTRKS_HIGH_PURITY_STUDY_LAYERS`.
+  INFERRED, no confirmed run yet.
 - `z_sideband_skim`: `DISAPPTRKS_CATEGORY_MODE=z_sideband_skim` plus
   `DISAPPTRKS_SKIM_OUTPUT` (required output directory/XRootD URL for the
   skimmed ROOT file) and a `DISAPPTRKS_FAKE_TRACK_CONTROL` choosing the
-  skim's sideband definition.
-- `tau_trigger_probability`: `DISAPPTRKS_CATEGORY_MODE=tau_trigger_probability`
-  with a tau-trigger dataset. Rarely used -- confirm with
-  `disapptrks-lepton-backgrounds` whether it's actually needed before running
-  it (the current tau estimate doesn't use it).
+  skim's sideband definition. INFERRED, no confirmed run yet.
+- `tau_trigger_probability` — **CONFIRMED**, `DATA_Muon` (not a separate
+  tau-trigger dataset — corrected 2026-09-13; the prior "rarely
+  used"/"not used by the current tau estimate" note here and in
+  `disapptrks-lepton-backgrounds/references/workflow.md` was stale.
+  `disapptrks-lepton-backgrounds/SKILL.md` is explicit that the tau estimate
+  *always* supplies `--tau-probability-files` from this job — it's the
+  standard production path, not a legacy/AN-only comparison). Smoke-tested
+  by Matt Joyce, 2026-09-13 (`--executor iterative --limit-files 1
+  --limit-chunks 1`), then submitted as a full `--scaleout 200 --queue
+  workday` run for 2025 with `DISAPPTRKS_CATEGORY_MODE=tau_trigger_probability`,
+  same dataset JSON/sample/year as `tau_pmiss_poffline`.
 
-Fill these in with real commands (and update their status) the first time
-each one is actually run and confirmed.
+Fill in `fiducial_maps`/`high_purity_study`/`z_sideband_skim` with real
+commands (and update their status) the first time each is actually run and
+confirmed.

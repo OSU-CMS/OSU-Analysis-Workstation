@@ -84,6 +84,29 @@ skill first if unfamiliar with them.
 - Treating "the runner command returned" as "the job is done" -- for the Dask
   executor, the command returns once workers are submitted, not once processing
   finishes. Check status before reporting a result or running the plotting command.
+- **Benign concurrent-`./shell` pip-install race.** Entering `./shell` in several
+  tmux sessions around the same time can hit `ERROR: Could not install packages...`
+  or `error: uninstall-no-record-file` while each session's `pip install -e` writes to
+  the same shared `.env`. This does not mean the environment is broken -- confirm with
+  the step-6 import check before treating it as a real failure; in practice both
+  `pocket_coffea` and `disapptrks` still import fine after this warning.
+- **Double-`cd` "config.py not found" trap.** If a tmux session was previously used
+  for the step-6 verification (`cd pocket_coffea && python -c "import ..."`) and is
+  then reused for a job command that *also* does `cd pocket_coffea && ...`, the shell
+  ends up nested two levels deep (`/srv/pocket_coffea/pocket_coffea`), and
+  `pocket_coffea.scripts.runner` fails with `Module path config.py not found!`
+  (or, if `cd` itself fails silently, a Dask/Condor error instead). Run `pwd` first if
+  reusing a session rather than assuming its cwd, or `cd /srv/pocket_coffea`
+  (absolute) rather than a relative `cd pocket_coffea` when unsure.
+- **Transient `dask@lpc` cluster-startup failure under concurrent load.** Launching
+  many `dask@lpc` clusters at once (e.g. several jobs submitted back-to-back) can hit
+  `ValueError: cannot get address of non-running Server` during cluster setup -- a
+  scheduler-binding race, not a real problem with the job or dataset. Just resubmit
+  the same command in the same session; it succeeds on retry.
+- **tmux sessions are pinned to whichever LPC login node created them**, but the
+  round-robin `cmslpc` alias can land you on a *different* node on a later SSH
+  connection -- see `lpc-remote-session`'s node-affinity note before concluding a
+  session "disappeared."
 
 ## Completion checks
 

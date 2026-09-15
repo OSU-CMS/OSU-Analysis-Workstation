@@ -19,6 +19,21 @@ duplicate their content, it chains them:
 Read those first if unfamiliar with any piece; this skill only adds the sequencing,
 the code-sync check, and the EOS publish step.
 
+## The `_dedx` output-directory convention
+
+**Give every job's `--outputdir` (and its EOS `--mode` tag in Step 5) a `_dedx`
+suffix** -- `analysis_output/<period>/<flavor>_pveto_dedx`,
+`analysis_output/<period>/tau_mu_pveto_dedx`, etc., for *every* mode, tau included
+(earlier versions of this skill only showed `_dedx` on the electron/muon paths, which
+is exactly what caused a real session to run all four tau jobs without it, and then
+have to explain the inconsistency and redo the EOS-mode naming after the fact). The
+point is to keep any session's or contributor's ad hoc/current-round-of-jobs output
+distinguishable from the analysis_output directory's many pre-existing runs sharing
+the same period/mode names -- both locally and on the shared EOS output space -- so a
+fresh submission never silently collides with or shadows someone else's prior output.
+If the user asks for a different suffix or naming scheme, follow that instead, but
+default to `_dedx` absent other guidance.
+
 **Electron/muon is a two-job flow; tau is a four-job flow with an extra manual input**
 (the effective trigger efficiency) -- see Steps 1-4 below, which branch by flavor.
 Don't try to force the tau flow into the electron/muon pair-of-jobs shape or vice versa.
@@ -118,14 +133,15 @@ DISAPPTRKS_DATASET_SAMPLE=DATA_Muon \
 DISAPPTRKS_DATASET_YEAR=<year-from-dataset-metadata> \
 python -m pocket_coffea.scripts.runner run \
   --cfg config.py \
-  --outputdir analysis_output/<period>/tau_mu_pveto \
+  --outputdir analysis_output/<period>/tau_mu_pveto_dedx \
   --executor dask@lpc --executor-custom-setup executors_lpc.py \
   --custom-run-options run_options_lpc_dask.yaml \
   --scaleout 200 --queue workday
 ```
 
 `tau_ele_pveto` is the same shape with `DISAPPTRKS_CATEGORY_MODE=tau_ele_pveto`, the
-`DATA_EGamma` dataset JSON, and `DISAPPTRKS_DATASET_SAMPLE=DATA_EGamma`.
+`DATA_EGamma` dataset JSON, `DISAPPTRKS_DATASET_SAMPLE=DATA_EGamma`, and
+`--outputdir analysis_output/<period>/tau_ele_pveto_dedx`.
 
 ```bash
 DISAPPTRKS_CATEGORY_MODE=tau_pmiss_poffline \
@@ -134,7 +150,7 @@ DISAPPTRKS_DATASET_SAMPLE=DATA_Muon \
 DISAPPTRKS_DATASET_YEAR=<year-from-dataset-metadata> \
 python -m pocket_coffea.scripts.runner run \
   --cfg config.py \
-  --outputdir analysis_output/<period>/tau_pmiss_poffline \
+  --outputdir analysis_output/<period>/tau_pmiss_poffline_dedx \
   --executor dask@lpc --executor-custom-setup executors_lpc.py \
   --custom-run-options run_options_lpc_dask.yaml \
   --scaleout 200 --queue workday
@@ -147,21 +163,24 @@ DISAPPTRKS_DATASET_SAMPLE=DATA_Muon \
 DISAPPTRKS_DATASET_YEAR=<year-from-dataset-metadata> \
 python -m pocket_coffea.scripts.runner run \
   --cfg config.py \
-  --outputdir analysis_output/<period>/tau_trigger_probability \
+  --outputdir analysis_output/<period>/tau_trigger_probability_dedx \
   --executor dask@lpc --executor-custom-setup executors_lpc.py \
   --custom-run-options run_options_lpc_dask.yaml \
   --scaleout 200 --queue workday
 ```
 
-All four are unconfirmed by an actual run as of 2026-09-11 (see
-`disapptrks-job-submission/references/commands.md`) -- smoke-test each mode first
-(`--limit-files 1 --limit-chunks 1`, dropping the Dask/Condor flags, or
-`--scaleout 2 --queue microcentury`) before the full submission, same as any other
-first-time-confirmed mode.
+All four `DISAPPTRKS_CATEGORY_MODE`s are **CONFIRMED** as of 2026-09-15 -- check
+`disapptrks-job-submission/references/commands.md`'s status table for the current,
+authoritative confirmation state and exact confirmed command shape rather than trusting
+this snapshot as it ages. For a genuinely new mode (not these four), still smoke-test
+first (`--limit-files 1 --limit-chunks 1`, dropping the Dask/Condor flags, or
+`--scaleout 2 --queue microcentury`) before a full submission.
 
 Use one tmux session per job (e.g. `tau-mu-pveto-2022CD`, `tau-ele-pveto-2022CD`,
 `tau-pmiss-poffline-2022CD`, `tau-trigger-probability-2022CD`) per
-`disapptrks-lpc-execution`.
+`disapptrks-lpc-execution` -- and if a session gets reused across multiple job
+submissions, run `pwd` before each new command rather than assuming its working
+directory, per `disapptrks-lpc-execution`'s double-`cd` trap.
 
 ## Step 2 -- submit the `<flavor>_pmiss_poffline` job (electron/muon)
 
@@ -230,10 +249,10 @@ disapptrks estimate-tau-background \
   --output-tex tables/tau_background_<period>.tex \
   --trigger-efficiency <value> \
   --trigger-efficiency-error <value> \
-  --tau-probability-files pocket_coffea/analysis_output/<period>/tau_trigger_probability/output_*.coffea \
-  --tau-control-files pocket_coffea/analysis_output/<period>/tau_pmiss_poffline/output_*.coffea \
-  --tau-mu-files pocket_coffea/analysis_output/<period>/tau_mu_pveto/output_*.coffea \
-  --tau-ele-files pocket_coffea/analysis_output/<period>/tau_ele_pveto/output_*.coffea
+  --tau-probability-files pocket_coffea/analysis_output/<period>/tau_trigger_probability_dedx/output_*.coffea \
+  --tau-control-files pocket_coffea/analysis_output/<period>/tau_pmiss_poffline_dedx/output_*.coffea \
+  --tau-mu-files pocket_coffea/analysis_output/<period>/tau_mu_pveto_dedx/output_*.coffea \
+  --tau-ele-files pocket_coffea/analysis_output/<period>/tau_ele_pveto_dedx/output_*.coffea
 ```
 
 `--trigger-efficiency`/`--trigger-efficiency-error` are **required and have no
@@ -249,10 +268,20 @@ computed from the `tau_trigger_probability` job (a printed
 
 ## Step 5 -- publish to EOS
 
+**Do this step. Don't let it fall off the end of the task.** It's easy to stop after
+Step 4 once a number is in hand and treat the job as "done" -- but per the user's own
+correction after a real session skipped this for nearly every job it ran, the estimate
+isn't actually finished until the output has been published, since that's what makes
+it visible to anyone else using the shared EOS space. Set a reminder for yourself (a
+task-list entry, or just holding it in mind) the moment you submit a job, not only
+after Step 4's number is computed.
+
 For each job directory (`<flavor>_pveto_dedx`/`<flavor>_pmiss_poffline_dedx` for
-electron/muon; `tau_mu_pveto`/`tau_ele_pveto`/`tau_pmiss_poffline`/
-`tau_trigger_probability` for tau), and the `tables/<flavor|tau>_background_<period>`
-output, run one `publish-output` call per directory:
+electron/muon; `tau_mu_pveto_dedx`/`tau_ele_pveto_dedx`/`tau_pmiss_poffline_dedx`/
+`tau_trigger_probability_dedx` for tau), and the `tables/<flavor|tau>_background_<period>_dedx`
+output, run one `publish-output` call per directory, keeping the `_dedx` suffix in the
+EOS `--mode` tag too (not just the local directory) -- that's what keeps this round's
+publish from colliding with a prior, differently-named publish of the same period/mode:
 
 ```bash
 disapptrks publish-output <local-dir> \
@@ -262,7 +291,11 @@ disapptrks publish-output <local-dir> \
 
 (Swap `--mode` for whichever job directory or the tables tag matches what's being
 published -- for tau that's four separate job-directory calls plus the tables call,
-not a combined publish.)
+not a combined publish. When publishing many directories in one pass, a small driver
+script looping over `(period, mode, local_dir)` triples and calling `publish-output`
+for each is easier to get right and to re-verify afterward than typing out each call
+by hand -- check the resulting log for exit codes and any "already exists" lines
+before considering the batch done.)
 
 **Unless the user indicated this is a dev/test run** -- skip this step and say so
 explicitly rather than defaulting to publishing. If the command reports the
@@ -277,8 +310,6 @@ the fake-track estimate, if a worked example is useful.
 Once a job is confirmed to have actually completed successfully, update its entry in
 `disapptrks-job-submission/references/commands.md` to **CONFIRMED** with the exact
 command used, the date, and who ran it -- per that skill's own stated convention. Do
-this proactively, without being asked. As of 2026-09-11, `electron_pveto` for 2023C is
-still only REFERENCE (shown, not confirmed complete) and `electron_pmiss_poffline` is
-INFERRED; `muon_pveto`/`tau_mu_pveto`/`tau_ele_pveto`/`*_pmiss_poffline` and
-`tau_trigger_probability` are all INFERRED with no confirmed run yet -- all are live
-candidates to upgrade the first time this skill actually confirms them.
+this proactively, without being asked. Check that file directly for the current,
+authoritative confirmation state of each mode rather than trusting a status snapshot
+written into this skill, which will drift out of date as more runs get confirmed.

@@ -40,7 +40,7 @@ Two related codebases sit under the same parent workspace:
 | `tau_mu_pmiss_poffline` | `DATA_Muon` | Legacy-equivalent single-muon-triggered tau control for `N_ctrl`, `Poffline`, `Pmiss`; no low-`MT` muon required. |
 | `tau_ele_pmiss_poffline` | `DATA_EGamma` | Compatibility/diagnostic only; excluded from the final tau normalization. |
 | `tau_pmiss_poffline` | `DATA_Muon` | AN-style tau normalization using the muon+tau cross-trigger; no low-`MT` offline muon required. |
-| `tau_trigger_probability` | `DATA_Tau` or tau-trigger dataset | Optional legacy/AN diagnostic for a muon+tau-trigger normalization. Not used by the current single-lepton-trigger tau control regions. |
+| `tau_trigger_probability` | `DATA_Muon` | `P(tau) = N_cross / N_muon` (dissertation eq. 7.7-7.8); the tau estimate always consumes this via `--tau-probability-files` -- standard production path, not a legacy/AN-only comparison. See the matching entry further below. |
 | `fake_tracks` | `DATA_JetMET`, `DATA_MET`, `DATA_Muon`, or `DATA_EGamma` | Fake-track estimate control regions -- a separate background (see the `disapptrks-track-diagnostics` skill's `references/fake-track-background-estimate.md`), not part of this lepton-background workflow. |
 
 Avoid `muon_backgrounds`, `egamma_backgrounds`, and `all` for production -- they select

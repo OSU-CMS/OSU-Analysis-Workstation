@@ -99,6 +99,16 @@ ssh <lpc-host-alias> "tmux new -d -s <session-name> '<command>'"
 - Don't `tmux kill-session` a still-running job unless asked -- stopping a
   partially-complete production job can waste significant compute/queue time. If a job
   needs to be stopped, say so and ask first.
+- **tmux sessions are pinned to the specific login node they were created on, but the
+  `cmslpc` alias is load-balanced across several nodes** -- a fresh `ssh <alias>`
+  connection in a later turn (or a later session entirely) can land on a *different*
+  node than the one holding your tmux session, making `tmux ls` come back empty even
+  though the session is still alive. Before concluding a session is gone, check
+  `ssh <alias> hostname` against the node you created it on (worth noting in your own
+  tracking when you create the session), and if they differ, retry against that
+  specific node directly (e.g. `ssh <lpc-username>@cmslpc373.fnal.gov` rather than the
+  round-robin alias) -- `ssh` to a bare hostname needs the username spelled out
+  explicitly since the alias's `User` mapping doesn't apply.
 
 ## Checking on a long job without blocking
 

@@ -18,6 +18,20 @@ duplicate their content, it chains them:
 Read those first if unfamiliar with any piece; this skill only adds the sequencing,
 the pre-flight dataset check, and the EOS output-publish step.
 
+## The `_dedx` output-directory convention
+
+**Give every job's `--outputdir`, the postprocessed `--output-dir`, and the EOS
+`--mode` tag in Step 5 a `_dedx` suffix** --
+`analysis_output/<period>/fake_tracks/<control>_dedx` locally,
+`tables/fake_tracks/<period>_dedx` for the standardized estimate output, and
+`fake_tracks/<control>_dedx`/`fake_tracks/<period>_dedx` as the EOS mode tags. This
+keeps a fresh round of jobs distinguishable from the many pre-existing runs already
+sharing the same period/control names in `analysis_output/` and on the shared EOS
+output space, both locally and once published, so a new submission never silently
+collides with or shadows someone else's prior output. If the user asks for a
+different suffix or naming scheme, follow that instead, but default to `_dedx` absent
+other guidance.
+
 ## Trigger
 
 A request naming one or more run periods and asking to run/submit/estimate fake
@@ -67,7 +81,7 @@ Use the exact `fake_tracks` command shape from
 - `DISAPPTRKS_DATASET_JSON=datasets/eos_<period>_<Sample>_OSUv2.json`,
   `DISAPPTRKS_DATASET_SAMPLE`/`DISAPPTRKS_DATASET_YEAR` read from that JSON's own
   metadata (per `disapptrks-job-submission` -- don't infer the year from the filename)
-- `--outputdir analysis_output/<period>/fake_tracks/<control>`
+- `--outputdir analysis_output/<period>/fake_tracks/<control>_dedx`
 - `dask@lpc` executor with the usual scaleout/queue flags
 
 Follow `disapptrks-lpc-execution`'s full sequence to actually run each one: SSH in,
@@ -94,11 +108,26 @@ command returned -- see `disapptrks-lpc-execution`'s completion checks), then ru
 ```bash
 disapptrks make-standard-fake-track-estimate \
   --run-period <period> \
-  --input-base pocket_coffea/analysis_output \
-  --output-dir tables/fake_tracks/<period> \
+  --basic-files pocket_coffea/analysis_output/<period>/fake_tracks/basic_dedx/output_all.coffea \
+  --zmumu-files pocket_coffea/analysis_output/<period>/fake_tracks/zmumu_dedx/output_all.coffea \
+  --zee-files pocket_coffea/analysis_output/<period>/fake_tracks/zee_dedx/output_all.coffea \
+  --output-dir tables/fake_tracks/<period>_dedx \
   --transfer-factor-source fit \
-  --fit-plots --sideband-plots
+  --fit-plots
 ```
+
+Pass the three `--*-files` explicitly rather than relying on `--input-base`'s
+auto-discovery (which defaults to the unsuffixed `analysis_output/<period>/fake_tracks/{basic,zmumu,zee}`
+paths) -- with the `_dedx` convention above, auto-discovery will silently pick up
+someone else's older, differently-suffixed run instead of this one's.
+
+**Drop `--sideband-plots` if the jobs ran with `DISAPPTRKS_ENABLE_FAKE_SIDEBAND_HISTOGRAMS=0`**
+(the `disapptrks-fake-track-background` skill's own recommended production setting) --
+that flag skips exactly the per-hit-pattern/dE/dx diagnostic histograms
+`--sideband-plots` needs, and passing it anyway raises a `KeyError` partway through
+(the core estimate itself still computes and gets written before the crash, but the
+command exits nonzero). `--fit-plots` still works since the transfer-factor-fit
+histograms are always kept regardless of that env var.
 
 If a period is only partially available (e.g. `zmumu` ready but `basic`/`zee` still
 missing their dataset JSON per Step 1), say so explicitly rather than running the
@@ -107,14 +136,30 @@ standardized estimate against an incomplete set of controls -- offer the single-
 
 ## Step 5 -- publish to EOS
 
-For each completed control's `analysis_output/<period>/fake_tracks/<control>`
-directory, and for the postprocessed `tables/fake_tracks/<period>` directory, run:
+**Do this step. Don't let it fall off the end of the task.** It's easy to stop once
+Step 4 has produced a number and treat the job as "done" -- but per the user's own
+correction after a real session skipped this for nearly every fake-track and
+lepton-background job it ran in a row, the estimate isn't actually finished until the
+output is published, since that's what makes it visible to anyone else using the
+shared EOS space. Track this as an explicit remaining step the moment jobs are
+submitted, not only after Step 4's number is in hand.
+
+For each completed control's `analysis_output/<period>/fake_tracks/<control>_dedx`
+directory, and for the postprocessed `tables/fake_tracks/<period>_dedx` directory, run:
 
 ```bash
 disapptrks publish-output <local-dir> \
-  --period <period> --mode fake_tracks/<control-or-tables-tag> \
+  --period <period> --mode fake_tracks/<control-or-tables-tag>_dedx \
   --eos-base root://cmseos.fnal.gov//store/group/lpcdisapptrks/disapptrks_output
 ```
+
+Keep the `_dedx` suffix in the EOS `--mode` tag too, not just the local directory --
+that's what keeps this round's publish from colliding with a prior, differently-named
+publish of the same period/control. When publishing many directories in one pass (a
+full multi-period, multi-control run), a small driver script looping over
+`(period, mode, local_dir)` triples and calling `publish-output` for each is easier to
+get right -- and easier to re-verify afterward by grepping its log for exit codes and
+any "already exists" lines -- than typing out each call by hand.
 
 **Unless the user indicated this is a dev/test run** -- in that case, skip this step
 and say so explicitly rather than defaulting to publishing.
@@ -135,12 +180,11 @@ update its entry in `disapptrks-job-submission/references/commands.md` to
 **CONFIRMED** with the exact command used, the date, and who ran it -- per that
 skill's own stated convention. Do this proactively, without being asked.
 
-## Known gap as of 2026-09-10
+## Dataset-JSON readiness changes over time
 
-The shared EOS dataset-JSON space has `eos_2024_Muon.json` (pre-`OSUv2`, not the
-canonical `_OSUv2` name the `fake_tracks` mode expects) but **no `eos_2024_JetMET*`
-or `eos_2024_EGamma*_OSUv2` dataset JSON at all**, and
-`nano_v2_migration_checklist.md`'s 2024 section shows that production is still
-early/mid-stage. A first real "fake tracks for 2024" request will very likely only be
-able to run the `zmumu` control -- confirm current status against the checklist and
-the live EOS listing (Step 1) rather than assuming this note is still accurate.
+Which (period, control) pairs have a canonical dataset JSON -- and whether the
+underlying NanoAOD production is actually finished, not just published -- changes as
+production continues. Don't trust a stale snapshot written into this skill; always
+run Step 1's live EOS listing plus a check of
+`nano_v2_migration_checklist.md` for the period/primary at hand before concluding a
+control is or isn't ready.
