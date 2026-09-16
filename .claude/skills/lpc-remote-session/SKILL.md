@@ -48,29 +48,32 @@ Claude has no secure way to provide the passphrase even if asked to. Before doin
 something that needs a proxy, check without creating one:
 
 ```bash
-ssh <lpc-host-alias> "voms-proxy-info --exists --valid 1:00"
+ssh <lpc-host-alias> "bash -lc 'voms-proxy-info --exists --valid 1:00'"
 ```
 
-Exit code `0` means a proxy valid for at least the next hour exists.
+Exit code `0` means a proxy valid for at least the next hour exists. Use a login
+shell (`bash -lc '...'`), not a bare `ssh <host> "cmd"` -- a non-login shell never
+sources `.bash_profile`/`.bashrc`, so a custom `X509_USER_PROXY` set there is
+invisible to it even though the proxy is real (a confirmed case: the user's actual
+path only ever showed up once they ran `voms-proxy-info` themselves and shared the
+output). A login shell sees the same environment their own terminal would, with
+nothing to guess, and still falls back to the plain default
+(`/tmp/x509up_u$(id -u)`) if their profile sets nothing.
 
-**Before concluding there's no proxy, retry against the LPC-conventional home-directory
-path.** A bare `ssh <host> "cmd"` runs a non-interactive, non-login shell, which
-typically does not source `.bashrc`/`.bash_profile` -- so `X509_USER_PROXY` comes back
-empty even when the user's own interactive shell has it exported and a real proxy
-exists. `voms-proxy-info`'s own fallback default is `/tmp/x509up_u$(id -u)`, but LPC
-users conventionally keep their proxy under their (persistent, shared-filesystem) home
-directory instead, precisely because `/tmp` is node-local and a proxy left there isn't
+If that fails, retry the LPC-conventional home-directory path before concluding
+there's no proxy -- some users keep it there without exporting `X509_USER_PROXY`
+anywhere, precisely because `/tmp` is node-local and a proxy left there isn't
 visible from a different login node:
 
 ```bash
 ssh <lpc-host-alias> "X509_USER_PROXY=\$HOME/x509up_u\$(id -u) voms-proxy-info --exists --valid 1:00"
 ```
 
-Only after *both* the default-location check and this home-directory check fail should
-you treat the proxy as actually missing/expired -- stop and ask the user to run
-`voms-proxy-init` themselves (typically `voms-proxy-init --voms cms --valid 192:00`) in
-their own terminal, then continue once they confirm it's done. Don't work around a
-missing proxy with a fallback that avoids the check -- surface it.
+Only after *both* checks fail should you treat the proxy as actually missing/expired
+-- stop and ask the user to run `voms-proxy-init` themselves (typically
+`voms-proxy-init --voms cms --valid 192:00`) in their own terminal, then continue
+once they confirm it's done. Don't work around a missing proxy with a fallback that
+avoids the check -- surface it.
 
 If both checks fail and the user reports (e.g. via their own interactive
 `voms-proxy-info`) that a valid proxy exists somewhere else, ask where rather than
