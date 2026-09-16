@@ -114,14 +114,26 @@ def check_ssh_config() -> None:
             "without one -- see the lpc-remote-session skill."
         )
 
+    # GSSAPIAuthentication/GSSAPIDelegateCredentials go inline in each alias
+    # block below, *in addition to* the raw-hostname block further down -- SSH
+    # matches `Host` patterns against the alias typed on the command line, not
+    # the HostName it resolves to, so the raw-hostname block alone silently
+    # never applies to an alias like cmslpc-claude (the bug a real session hit
+    # and had to hand-fix -- see git history). The raw-hostname block is still
+    # needed on its own for anyone/anything that SSHes to the literal hostname
+    # directly (e.g. the CMSSW_13/el8 steps in disapptrks-lpc-working-area-setup).
     snippet = f"""
 Host cmslpc
     HostName cmslpc-el9.fnal.gov
     User {username}
+    GSSAPIAuthentication yes
+    GSSAPIDelegateCredentials yes
 
 Host cmslpc-claude
     HostName cmslpc-el9.fnal.gov
     User {username}
+    GSSAPIAuthentication yes
+    GSSAPIDelegateCredentials yes
     ControlMaster auto
     ControlPath ~/.ssh/cm-claude-%r@%h:%p
     ControlPersist 10m
