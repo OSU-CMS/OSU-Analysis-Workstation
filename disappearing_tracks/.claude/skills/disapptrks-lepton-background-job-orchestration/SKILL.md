@@ -266,6 +266,21 @@ is what's expected (it always is, for tau) and that `tau_probability` was actual
 computed from the `tau_trigger_probability` job (a printed
 `Calculated tau_probability=...` line) rather than silently falling back to `None`.
 
+## Step 4b -- combine into a multi-period table (once several periods are done)
+
+Once more than one period's Step 4 table exists for the same flavor, don't leave
+them as separate per-period files if the user wants an overview -- combine them with
+`disapptrks combine-lepton-background-tables` (one flavor, many periods) or, once
+muon/electron/tau/fake-track are all done for a period, `disapptrks
+combine-total-background-table` (Leptons/Spurious Tracks/Total, matching the
+dissertation's summary-table layout). Both are documented with full example commands
+in `disapptrks-lepton-backgrounds/references/workflow.md`'s "Combining multiple
+periods into one table" section -- read that rather than hand-building the table or
+reusing a stale one-off script. Regenerate the combined table any time a
+contributing per-period table changes (a new period finishes, or an existing one gets
+recomputed after a bug fix) -- it's easy to update the per-period tables and forget
+the combined one is now stale.
+
 ## Step 5 -- publish to EOS
 
 **Do this step. Don't let it fall off the end of the task.** It's easy to stop after

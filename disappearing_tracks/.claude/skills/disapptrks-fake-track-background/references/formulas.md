@@ -70,6 +70,57 @@ control region be the basic/JetMET selection directly (no Z->ll normalization ne
 by omitting `--basic-yield-category`/`--z-to-ll-yield-category`, or generalizes to any
 other control by passing those two categories explicitly.
 
+## Zero-sideband layer bins get a Poisson upper bound, not `0 +/- 0`
+
+A layer bin with zero observed sideband events (`N_sideband = 0`, common in
+`>=6`-layer bins for low-luminosity periods) is a real Poisson measurement, not an
+infinitely precise zero -- `estimate_fake_track_background_an` quotes the standard
+zero-count 68% CL upper limit (`POISSON_ZERO_UPPER_68` from `tables.py`, propagated
+through the transfer factor and basic yield) for `raw_probability`, `fake_probability`,
+and `fake_yield` in that case, rather than the `0 +/- 0` that plain `Count`
+multiplication/division would otherwise produce (its relative-variance formula is
+undefined, and guarded to `0.0`, at a zero central value). If a future formula change
+reintroduces bare `Count.__mul__`/`__truediv__` for a quantity that can be legitimately
+zero, check the resulting table for `0 +/- 0` cells before trusting it -- that's the
+symptom of losing this treatment, not evidence of a genuinely infinite-precision zero.
+The same pattern (a zero-count `control_raw`, guarded via
+`_multiply_counts_at_physical_boundary`/`_divide_counts_at_physical_boundary`) fixes
+the equivalent bug for the muon/electron/tau lepton-background estimate -- see
+`disapptrks-lepton-backgrounds`.
+
+## Combining multiple periods into one table
+
+`disapptrks combine-lepton-background-tables`/`combine-total-background-table` (see
+`disapptrks-lepton-backgrounds/references/workflow.md`) can combine fake-track JSON
+into the "Spurious Tracks"/"Total" columns of a leptons+fakes summary table. For a
+fake-track-only, multi-period AN Table-34-style comparison (`P_fake`/`N_fake` for both
+Z->mu mu and Z->ee, one table spanning several periods), the underlying function
+already exists -- `write_combined_fake_track_table34_latex` in `fake_tracks.py`,
+called by `make-fake-track-table34`'s single-period command
+(`write_fake_track_table34_latex` is a one-period wrapper around it) -- but it is not
+yet wired to its own CLI subcommand, only used internally. Until it is, build a
+multi-period table34 with a short script:
+
+```python
+from pathlib import Path
+from disapptrks.fake_tracks import write_combined_fake_track_table34_latex
+
+periods = ["2022CD", "2022EFG", "2023C", "2023D", "2024", "2025", "2026"]
+mapping = {
+    p: [Path(f"tables/fake_tracks/{p}_dedx/zmumu.json"), Path(f"tables/fake_tracks/{p}_dedx/zee.json")]
+    for p in periods
+}
+write_combined_fake_track_table34_latex(
+    mapping, Path("tables/fake_tracks_combined_table34.tex"), include_table_env=True
+)
+```
+
+This includes each period's `combined` (all-layers) row; drop those lines afterward
+(`grep -v '& combined &'`) if the target format only wants the per-layer rows -- the
+dissertation's own summary tables often do. If this pattern gets reused often, wire
+it into `cli.py` as `combine-fake-track-table34` (mirroring
+`_combine_lepton_background_tables_command`'s shape) rather than repeating the script.
+
 ## Sanity-checking against the dissertation
 
 Dissertation Tables 7.30-7.31 give, for 2022CD/2022EFG/2023C/2023D and each layer bin,

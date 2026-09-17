@@ -129,6 +129,24 @@ pattern (`Cut`/`StandardSelection`/`CartesianSelection`, `HistConf`/`Axis`,
   automatic derivation (`trigger_efficiency_method=manual-cross-trigger-control`
   always) -- confirm the current effective value with the user or the AN/dissertation
   for the run period at hand rather than reusing another period's number by default.
+- **Never multiply/divide `Count`s that could be exactly zero using plain
+  `Count.__mul__`/`__truediv__`.** Their relative-variance formula
+  (`variance = value^2 * sum of relative variances`) is undefined at
+  `value == 0`, and `_relative_variance()` guards it to `0.0` there -- so a
+  chain like `control * p_veto * poffline * pmiss` silently collapses to
+  exactly `0 +/- 0` the moment any one factor's central value is zero, even
+  if that factor (e.g. a zero-count `control_raw`, or a zero Pveto
+  numerator) has a real, nonzero uncertainty. Use
+  `_multiply_counts_at_physical_boundary`/`_divide_counts_at_physical_boundary`
+  (`lepton_backgrounds.py`) instead -- mathematically identical to the plain
+  `Count` chain away from zero, but propagates absolute derivatives so a
+  factor's real uncertainty survives the zero boundary. `estimate_lepton_background`
+  uses these for every flavor (not just tau); a zero-count `control_raw` is
+  also given the standard zero-count 68% CL Poisson upper limit
+  (`POISSON_ZERO_UPPER_68` from `tables.py`) there instead of the default
+  `Count(value)`'s `variance = value = 0`. Any *new* multiplicative chain
+  built from raw event counts should follow the same pattern rather than
+  reusing bare `Count` arithmetic and reintroducing `0 +/- 0` results.
 
 ## Documentation discipline
 

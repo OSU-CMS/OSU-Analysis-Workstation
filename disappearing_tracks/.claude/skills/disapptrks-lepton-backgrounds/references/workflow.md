@@ -235,6 +235,67 @@ For a smoke test, append to the runner command:
 --limit-files 1 --limit-chunks 1 --scaleout 2 --queue microcentury
 ```
 
+## Combining multiple periods into one table
+
+Once several periods' JSON outputs exist, don't hand-build a multi-period table --
+two CLI commands already do this:
+
+**One flavor, many periods** (`combine-lepton-background-tables`, works for
+muon/electron/tau JSON alike -- title/column set is inferred from the JSON's own
+`flavor` field):
+
+```bash
+disapptrks combine-lepton-background-tables \
+  --input 2022CD=tables/muon_background_2022CD_dedx.json \
+  --input 2022EFG=tables/muon_background_2022EFG_dedx.json \
+  --input 2023C=tables/muon_background_2023C_dedx.json \
+  --output-tex tables/muon_background_combined.tex \
+  --table-env
+```
+
+Repeat `--input RUN_PERIOD=path.json` in the order you want the periods to appear;
+each period's rows get their own `\multirow` block, separated by an `\hline` from
+the next period's block. `--flavor` filters a JSON down to one exact flavor label
+(`'$e$'`, `'$\mu$'`, `'$\tau_h$'`) if a single file ever mixes them -- not needed for
+the standard one-flavor-per-file JSONs this workflow produces.
+
+**Leptons + fake tracks -> one Total-background table**
+(`combine-total-background-table`, added specifically to reproduce the
+dissertation's "Expected Backgrounds: Leptons / Spurious Tracks / Total" summary
+table): sums the muon/electron/tau estimates per period/layer bin into "Leptons",
+takes the *nominal* fake-track control region's yield (Z->mu mu by default -- Z->ee
+is a cross-check only, per the dissertation convention, and is not folded in) as
+"Spurious Tracks", and adds the two (in quadrature) for "Total". Statistical
+uncertainties only.
+
+```bash
+disapptrks combine-total-background-table \
+  --muon-input 2022CD=tables/muon_background_2022CD_dedx.json \
+  --electron-input 2022CD=tables/electron_background_2022CD_dedx.json \
+  --tau-input 2022CD=tables/tau_background_2022CD_dedx.json \
+  --fake-input 2022CD=tables/fake_tracks/2022CD_dedx/zmumu.json \
+  --muon-input 2022EFG=tables/muon_background_2022EFG_dedx.json \
+  --electron-input 2022EFG=tables/electron_background_2022EFG_dedx.json \
+  --tau-input 2022EFG=tables/tau_background_2022EFG_dedx.json \
+  --fake-input 2022EFG=tables/fake_tracks/2022EFG_dedx/zmumu.json \
+  --output-tex tables/total_background_combined.tex \
+  --table-env
+```
+
+Every period passed via `--muon-input` must also appear in `--electron-input`,
+`--tau-input`, and `--fake-input` (a `ValueError` names which input is missing it
+otherwise) -- run this only once all four background pieces are done for every
+period you want in the table. `--fake-control-region zee` switches which control
+feeds "Spurious Tracks" if that's ever wanted instead of the zmumu default.
+
+Both commands live in `write_combined_lepton_background_latex`/
+`write_combined_total_background_latex` in `lepton_backgrounds.py`, wired into
+`cli.py`'s `_combine_lepton_background_tables_command`/
+`_combine_total_background_table_command` -- extend those, not a one-off script, if
+another combined-table shape is needed later (e.g. a fake-track-only multi-period
+table: `write_combined_fake_track_table34_latex` in `fake_tracks.py` already has the
+logic but isn't CLI-wired yet, see `disapptrks-fake-track-background`).
+
 ## Legacy Pveto convention
 
 The 2022/2023 legacy scripts use the histogram branch in

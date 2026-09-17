@@ -134,6 +134,19 @@ missing their dataset JSON per Step 1), say so explicitly rather than running th
 standardized estimate against an incomplete set of controls -- offer the single-control
 `estimate-fake-tracks` command instead if that's useful on its own.
 
+## Step 4b -- combine into a multi-period table (once several periods are done)
+
+For a multi-period fake-track-only table (AN Table-34-style, `P_fake`/`N_fake` for
+both Z->mu mu and Z->ee), or to fold a period's fake-track estimate into the
+Leptons/Spurious Tracks/Total summary table alongside the lepton-background
+estimates, see `disapptrks-fake-track-background/references/formulas.md`'s
+"Combining multiple periods into one table" section and
+`disapptrks-lepton-backgrounds/references/workflow.md`'s matching section for the
+exact commands (`combine-total-background-table` is CLI-wired; the fake-track-only
+multi-period table currently needs a short script, not a CLI command -- see the
+formulas.md note for why and how). Regenerate a combined table whenever a
+contributing per-period table changes underneath it.
+
 ## Step 5 -- publish to EOS
 
 **Do this step. Don't let it fall off the end of the task.** It's easy to stop once
