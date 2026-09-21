@@ -18,3 +18,8 @@
 .mount-config.local.sh
 CLAUDE.local.md
 **/CLAUDE.local.md
+
+# Local scratch artifacts for displaced_leptons (plots, skim supervision state,
+# profiles) -- real output, not analysis code.
+displaced_leptons/plots/
+displaced_leptons/tmp/
