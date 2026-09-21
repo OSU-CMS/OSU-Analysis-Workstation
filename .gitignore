@@ -1,8 +1,6 @@
 # Nothing else is actually ignored in this demo, so the full proposed structure is visible.
 # In the real repo, these would also be gitignored:
 #   mnt/                            (sshfs mount points)
-#   displaced_leptons/displaced_leptons/         (separate git repo)
-#   displaced_leptons/DisplacedLeptonsSupplement/ (separate git repo)
 #   <same pattern for each other analysis's child repo(s)>
 
 # ref/ is real here, not a placeholder: it holds per-machine symlinks to local
