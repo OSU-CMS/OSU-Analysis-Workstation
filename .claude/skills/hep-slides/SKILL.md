@@ -10,7 +10,7 @@ talk. An analysis's own talk outline, standard plots, and approval status belong
 that analysis's own skill layered on top of this one.
 
 Adapted from the plotting and rendering-review conventions in
-`references/OSU-Agentic-Analysis` (`src/methodology/appendix-plotting.md`,
+`ref/OSU-Agentic-Analysis` (`src/methodology/appendix-plotting.md`,
 `src/agents/plot_validator.md`, `src/agents/rendering_reviewer.md`,
 `src/conventions/preamble.tex`). That reference has no slide-specific content, so the
 talk structure and Beamer/pptx mechanics below are new, not lifted from it -- treat
