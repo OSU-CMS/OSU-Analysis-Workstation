@@ -29,28 +29,42 @@ Does three things:
 from __future__ import annotations
 
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SSH_CONFIG = Path.home() / ".ssh" / "config"
 
-# Extend this as each analysis's own CLAUDE.md fills in its real
-# reference-clone table. Only disappearing_tracks has one as of this writing --
-# see disappearing_tracks/CLAUDE.md's "Reference clones (ref/)" section.
-ANALYSIS_REF_CLONES: dict[str, list[tuple[str, str]]] = {
+# Extend this as each analysis's own CLAUDE.md fills in its real reference-clone table.
+ANALYSIS_REF_CLONES: dict[str, list[dict[str, str]]] = {
     "disappearing_tracks": [
-        ("git@github.com:OSU-CMS/DisappTrks_Nano.git", "ref/DisappTrks_Nano"),
-        ("git@github.com:OSU-CMS/DisappTrks.git", "ref/DisappTrks"),
-        ("git@github.com:OSU-CMS/OSUNano.git", "ref/OSUNano"),
-        ("git@github.com:PocketCoffea/PocketCoffea.git", "ref/PocketCoffea"),
+        {"url": "git@github.com:OSU-CMS/DisappTrks_Nano.git", "path": "ref/DisappTrks_Nano"},
+        {"url": "git@github.com:OSU-CMS/DisappTrks.git", "path": "ref/DisappTrks"},
+        {"url": "git@github.com:OSU-CMS/OSUNano.git", "path": "ref/OSUNano"},
     ],
+    "displaced_leptons": [
+        {"url": "git@github.com:lnestor/displaced_leptons.git", "path": "ref/displaced_leptons"},
+        {"url": "git@github.com:lnestor/DisplacedLeptonsSupplement.git", "path": "ref/DisplacedLeptonsSupplement"},
+        {"url": "git@github.com:DisplacedSUSY/DisplacedSUSY.git", "path": "ref/DisplacedSUSY"},
+        {"url": "git@github.com:OSU-CMS/OSUT3Analysis.git", "path": "ref/OSUT3Analysis"},
+    ]
 }
 
+CMSSW_SPARSE_DIRS = ["CommonTools", "Configuration", "DataFormats", "FWCore", "HLTrigger", "PhysicsTools"]
+
 # Group-wide read-only references (not tied to one analysis), cloned into the
-# root references/ directory. See references/README.md.
-ROOT_REF_CLONES: list[tuple[str, str]] = [
-    ("git@github.com:OSU-CMS/OSU-Agentic-Analysis.git", "references/OSU-Agentic-Analysis"),
+# root ref/ directory.
+ROOT_REF_CLONES: list[dict[str, str | list[str]]] = [
+    {"url": "git@github.com:OSU-CMS/OSU-Agentic-Analysis.git", "path": "ref/OSU-Agentic-Analysis"},
+    {"url": "git@github.com:PocketCoffea/PocketCoffea.git", "path": "ref/PocketCoffea"},
+    {"url": "git@github.com:scikit-hep/coffea.git", "path": "ref/coffea", "tag": "v0.7.29"},
+    {"url": "git@github.com:scikit-hep/awkward.git", "path": "ref/awkward", "tag": "v1.10.5"},
+    {"url": "git@github.com:cms-nanoAOD/correctionlib.git", "path": "ref/correctionlib", "tag": "v2.7.0"},
+    {"url": "git@github.com:CoffeaTeam/lpcjobqueue.git", "path": "ref/lpcjobqueue", "tag": "v0.5.0"},
+    {"url": "git@github.com:scikit-hep/uproot5.git", "path": "ref/uproot", "tag": "v4.3.7"},
+    {"url": "git@github.com:cms-sw/cmssw.git", "path": "ref/CMSSW_15_0_10", "tag": "CMSSW_15_0_10", "args": "--depth 1", "sparse": CMSSW_SPARSE_DIRS},
+    {"url": "git@github.com:cms-sw/cmssw.git", "path": "ref/CMSSW_14_0_21", "tag": "CMSSW_14_0_21", "args": "--depth 1", "sparse": CMSSW_SPARSE_DIRS},
 ]
 
 
@@ -59,15 +73,28 @@ def discover_analyses() -> list[str]:
         p.name
         for p in ROOT.iterdir()
         if p.is_dir() and (p / "CLAUDE.md").exists()
-    )
+)
 
 
-def clone_if_missing(url: str, dest: Path) -> None:
+def clone_if_missing(clone: dict[str, str | list[str]], base: Path) -> None:
+    dest = base / clone["path"]
     if dest.exists():
         print(f"Already exists, skipping: {dest}")
         return
     dest.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["git", "clone", url, str(dest)], check=True)
+    sparse = clone.get("sparse")
+    cmd = ["git", "clone"]
+    if "tag" in clone:
+        cmd += ["--branch", clone["tag"]]
+    if sparse:
+        cmd += ["--no-checkout", "--filter=blob:none"]
+    cmd += shlex.split(clone.get("args", ""))
+    cmd += [clone["url"], str(dest)]
+    subprocess.run(cmd, check=True)
+    if sparse:
+        subprocess.run(["git", "-C", str(dest), "sparse-checkout", "init", "--cone"], check=True)
+        subprocess.run(["git", "-C", str(dest), "sparse-checkout", "set", *sparse], check=True)
+        subprocess.run(["git", "-C", str(dest), "checkout"], check=True)
 
 
 def _find_cmslpc_username(text: str) -> str | None:
@@ -164,8 +191,8 @@ def setup_analyses() -> list[str]:
         print("No analysis directories with a CLAUDE.md found.")
         return []
 
-    for url, rel_dest in ROOT_REF_CLONES:
-        clone_if_missing(url, ROOT / rel_dest)
+    for clone in ROOT_REF_CLONES:
+        clone_if_missing(clone, ROOT)
 
     print("\nAnalyses available:", ", ".join(analyses))
     chosen = input("Which do you want to set up? (comma-separated, or 'all') ").strip()
@@ -187,8 +214,8 @@ def setup_analyses() -> list[str]:
                 "once its lead has filled that table in."
             )
             continue
-        for url, rel_dest in ref_clones:
-            clone_if_missing(url, ROOT / name / rel_dest)
+        for clone in ref_clones:
+            clone_if_missing(clone, ROOT / name)
 
     return valid_selected
 

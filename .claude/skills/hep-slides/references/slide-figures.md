@@ -1,6 +1,6 @@
 # Figure conventions for slides
 
-Adapted from `references/OSU-Agentic-Analysis/src/methodology/appendix-plotting.md`
+Adapted from `ref/OSU-Agentic-Analysis/src/methodology/appendix-plotting.md`
 (analysis-note rules). Slides keep the same figure-producing rules so a plot can go
 in a note or a talk unchanged; only the *placement* differs (height-based in Beamer,
 one message per slide).
