@@ -27,16 +27,16 @@ reference code from these local clones, not from the LPC, unless asked.
 
 ## Mount points
 
-The LPC work areas are mounted locally with SSHFS under `../mnt/` (the monorepo root
-`mnt/`). Use the normal Read and Edit tools on these paths to read and edit LPC files. If
-a mount is not up, ask the user to mount it.
+LPC work areas can optionally be mounted locally over SSHFS under `mnt/` (in this
+analysis directory), so the normal Read and Edit tools work directly against LPC files.
+This is per-user setup, not required. The actual mount table in use, if any, is
+per-machine and lives in the gitignored `CLAUDE.local.md` in this directory -- read that
+first. If it doesn't exist, assume mounting is not to be used.
 
-| Mount point | Remote path | Purpose |
-|---|---|---|
-| `../mnt/fnal-displaced-leptons/` | `/uscms_data/d3/lnestor/displaced_leptons` | Run 3 PocketCoffea-based analysis code |
-| `../mnt/fnal-DisplacedSUSY/` | `/uscms_data/d3/lnestor/DisplacedLeptons_CMSSW/Work/CMSSW_10_2_22/src` | Run 2 CMSSW-based analysis code, for comparison |
-| `../mnt/fnal-supplement-cmssw-15/` | `/uscms_data/d3/lnestor/CMSSW_15_0_10/src` | Supplement file generation, signal MC generation steps 3 and 4 |
-| `../mnt/fnal-supplement-cmssw-14/` | `/uscms_data/d3/lnestor/CMSSW_14_0_21/src` | Signal MC generation steps 1 and 2 |
+The mount table format is `.mount-config` (also gitignored -- per-user paths), one entry
+per line: `name:ssh_alias:remote_path[:local_path]`, where `ssh_alias` is a Host entry
+from `~/.ssh/config`. `scripts/mount.sh {mount|unmount|status} [name]` reads it -- with
+no name the command applies to every entry, with one just that mount.
 
 SSHFS is slow for broad searches. Locate files over SSH first. In a CMSSW area, run
 `find` from the `src/` subdirectory.

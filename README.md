@@ -32,9 +32,8 @@ it. `disappearing_tracks/` is the first fully real instance of this pattern;
    - Asks for your LPC username, whether sshfs mounting works on this machine, and
      (if you chose `disappearing_tracks`) which of the CMSSW_13/15/16
      CRAB/NanoAOD-production work areas you already have. These are recorded in
-     `CLAUDE.local.md` (prose for Claude) and `.mount-config.local.sh` (shell
-     variables), both gitignored. A grid-proxy path is deliberately *not* recorded;
-     it's checked live each session.
+     `CLAUDE.local.md` (prose for Claude), gitignored. A grid-proxy path is
+     deliberately *not* recorded; it's checked live each session.
 
 3. **(Optional) Create a fresh LPC working area.** If you need new CMSSW releases
    rather than just cloning existing ones, run Claude Code from
