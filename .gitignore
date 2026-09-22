@@ -1,23 +1,7 @@
-# Nothing else is actually ignored in this demo, so the full proposed structure is visible.
-# In the real repo, these would also be gitignored:
-#   mnt/                            (sshfs mount points)
-#   <same pattern for each other analysis's child repo(s)>
-
-# ref/ is real here, not a placeholder: it holds per-machine symlinks to local
-# framework checkouts (e.g. disappearing_tracks/ref/DisappTrks_Nano), so it's
-# ignored for real to avoid committing someone's personal absolute path.
 **/ref/
 
-# CLAUDE.local.md and .mount-config.local.sh are also real here, not
-# placeholders: scripts/setup.py can write real per-machine data into them
-# (LPC username, CMSSW work-area paths), so they're ignored for real too. The root
-# CLAUDE.local.md was previously committed with demo-only scaffold text; it's
-# untracked now (see git history) but the file itself is left in place.
-.mount-config.local.sh
 CLAUDE.local.md
 **/CLAUDE.local.md
 
-# Local scratch artifacts for displaced_leptons (plots, skim supervision state,
-# profiles) -- real output, not analysis code.
-displaced_leptons/plots/
-displaced_leptons/tmp/
+**/mnt/
+**/.mount-config
