@@ -8,7 +8,21 @@ specific -- it's the standard CMS Combine tool used downstream of any datacard.
 
 ## 1. The Combine environment
 
-`combineCards.py`, `text2workspace.py`, and `combine` come from the
+**Easiest route on the LPC (verified 2026-09-21, Combine v11): the standalone image on
+cvmfs -- no CMSSW area, no build.**
+
+```bash
+IMG=/cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-cloud/combine-standalone:latest
+apptainer exec "$IMG" /bin/bash -c 'cd <dir-with-cards> && combine -M AsymptoticLimits -d card.txt -m 700 --run blind -n .M700'
+```
+
+`combine`, `combineCards.py` and `text2workspace.py` are all on the image's `PATH`. A
+`cmsset_default.sh: No such file` warning from your `~/.bashrc` inside it is harmless. The
+working directory must be visible in the container (home is; `/uscms_data/...` may not be
+-- bind it explicitly with `-B`). Use the CMSSW-area route below only if you need a
+specific Combine version or CMSSW-tied features.
+
+Otherwise, `combineCards.py`, `text2workspace.py`, and `combine` come from the
 [`HiggsAnalysis/CombinedLimit`](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/)
 CMSSW package -- a *different* environment from the Apptainer/`lpcjobqueue` container a
 PocketCoffea job runs in, which does not have CMSSW at all. Concretely, on the LPC this
@@ -60,7 +74,20 @@ The method depends on what's being asked for:
 - A signal model with a very small or very large expected cross-section-times-BR can
   need explicit `--rMin`/`--rMax` bounds for the fit to converge sensibly -- if the
   default range gives a limit pinned at its edge, that's the usual cause, not
-  necessarily a broken datacard.
+  necessarily a broken datacard. **But do not overshoot**: a huge `--rMax` (e.g. `1e6`
+  for a counting experiment observing ~8 events) makes the Poisson mean vastly exceed the
+  observation, the p.d.f. underflows to 0 (`RooFit ... top-level p.d.f not greater than
+  zero`, `ERROR:Eval` lines), and `AsymptoticLimits` aborts after the first quantile --
+  yet still writes a `higgsCombine*.root`, whose single row holds a nonsense number. Size
+  `--rMax` per model from the yields (~30x the rough expected r limit is plenty; keep the
+  Poisson mean at `--rMax` within a few hundred events of the observation).
+- **Never trust a `higgsCombine*.root` just because it exists.** Check the `limit` tree
+  has all five `quantileExpected` rows (0.025/0.16/0.5/0.84/0.975 for `--run blind`), the
+  log has no `ERROR` lines, and the median is plausible against a hand estimate (e.g. sum
+  the per-bin Asimov `2((s+b)ln(1+s/b) - s)` over bins for r=1 to get Z, and expect
+  r_95 ~ 1.6/Z).
+- `quantileExpected` is stored as float32: cast to float64 before `round`-ing and matching
+  against Python float keys like `0.025`.
 - Run once per signal-model point (mass, lifetime, coupling, ...) in the exclusion
   grid -- Combine itself doesn't scan a model grid; that loop lives in whatever script
   or Condor submission drives repeated `combine` invocations, one per (workspace,

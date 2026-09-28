@@ -172,6 +172,20 @@ changes. Needs `python-pptx` (install into a throwaway venv; it is not in the ba
 environment) and `pdftoppm`. Nothing renders these files locally (no LibreOffice on the
 usual machine), so open the result in PowerPoint and check overflow by eye.
 
+## Keynote export
+
+Two routes, both scripted in `slides/`. **Editable:** open the `.pptx` from
+`make_pptx.py` in Keynote (File > Open, or AppleScript) -- fonts and spacing follow
+Keynote's importer. **Pixel-faithful:** `beamer_to_keynote.py` builds a Keynote deck
+directly with one full-slide image per compiled Beamer page (page text goes in the
+presenter notes); the look matches the PDF exactly but slide text is not editable.
+Notes from getting it working: build the deck natively via AppleScript rather than
+importing a big image-only `.pptx` (that import hung Keynote for 15+ minutes); create
+the document with `width:1920, height:1080` (the default is 4:3 and crops 16:9
+images); delete the default first slide *after* adding yours; wrap the script in
+`with timeout of 600 seconds` (default Apple-event timeout is 120 s); and keep staging
+files under the project, since sandboxed Keynote cannot read the system temp dir.
+
 ## Production/infrastructure-only status talks
 
 When the update is about NanoAOD production rather than physics results (no analysis
