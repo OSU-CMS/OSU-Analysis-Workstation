@@ -30,13 +30,6 @@ the commands. Personal space lives at `/store/user/<lpc-username>`; any
 analysis-specific shared EOS subdirectory (e.g. a production output area) is documented
 in that analysis's own `CLAUDE.md`.
 
-## FNAL Mount
-
-Not in active use yet -- every documented workflow today runs over SSH (via
-`lpc-remote-session`) rather than through a local sshfs mount. `mnt/` and
-`scripts/mount_remote.py` exist as scaffolding for that if/when an analysis actually
-needs one; there's no real mount table to configure until then.
-
 ## Style guidelines
 
 TBD -- not yet decided whether style conventions (see the `python-style` skill) apply
@@ -64,7 +57,6 @@ Run `scripts/setup.py` once per machine: checks/suggests LPC SSH aliases (includ
 multiplexed one for Claude's own automated connections -- see the `lpc-remote-session`
 skill), clones an analysis's `ref/` reference clones, and records your LPC
 username/sshfs-support -- plus, if you select `disappearing_tracks`, its
-CRAB/NanoAOD-production CMSSW release work areas -- in `CLAUDE.local.md` and
-`.mount-config.local.sh` (both gitignored -- see `.gitignore`). Deliberately doesn't
-record a grid proxy path -- `lpc-remote-session` checks that live each session
-instead of trusting a stored path that could go stale.
+CRAB/NanoAOD-production CMSSW release work areas -- in `CLAUDE.local.md` (gitignored --
+see `.gitignore`). Deliberately doesn't record a grid proxy path -- `lpc-remote-session`
+checks that live each session instead of trusting a stored path that could go stale.
