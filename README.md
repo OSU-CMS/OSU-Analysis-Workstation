@@ -25,7 +25,7 @@ it. `disappearing_tracks/` is the first fully real instance of this pattern;
      second, SSH-multiplexed alias (conventionally `cmslpc-claude`) reserved for
      Claude's own repeated automated connections, so they reuse one authenticated
      connection instead of paying a fresh Kerberos/GSSAPI handshake per command.
-   - Clones the group-wide reference (`references/OSU-Agentic-Analysis`), then asks
+   - Clones the group-wide reference (`ref/OSU-Agentic-Analysis`), then asks
      which analyses you want (e.g. `disappearing_tracks`) and clones that analysis's
      reference repos into `<analysis>/ref/` (e.g. `DisappTrks_Nano`, `DisappTrks`,
      `OSUNano`, `PocketCoffea`). Anything already present is skipped.

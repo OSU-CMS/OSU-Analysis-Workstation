@@ -28,7 +28,7 @@ Generic, tool-focused skills only:
   optional .pptx export: talk structure, slide-figure conventions (mplhep CMS
   style, labels, legends, explicit `yerr` for derived quantities), a compiling
   Beamer starter template, and a pre-delivery slide check. Adapted from the
-  plotting/rendering-review rules in `references/OSU-Agentic-Analysis`; that repo has
+  plotting/rendering-review rules in `ref/OSU-Agentic-Analysis`; that repo has
   no slide-specific content, so the talk structure and Beamer/pptx parts are a
   first draft, not lifted from it. Analysis-specific talk outlines belong in that
   analysis's own skill.
