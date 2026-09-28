@@ -62,7 +62,7 @@ it. `disappearing_tracks/` is the first fully real instance of this pattern;
 - **Root `CLAUDE.md` and `.claude/skills/`** hold what every analysis shares:
   server/LPC access conventions, and generic tool skills (`lpc-crab`, `lpc-eos`,
   `lpc-remote-session`, `lpc-root`, `pocketcoffea-conventions`, `python-style` -- see
-  [`.claude/skills/README.md`](.claude/skills/README.md)).
+  [`.claude/skills/`](.claude/skills/)).
 - **Each analysis is its own directory** with its own nested `CLAUDE.md` and
   `.claude/skills/` for anything only it needs -- run Claude Code from inside that
   directory. `disappearing_tracks/` has the fullest set so far: job submission and
