@@ -154,3 +154,33 @@ ssh cms-t3.mps.ohio-state.edu "tmux new -d -s <session-name> '<command>'"
 - **Don't confuse `cms-t3` and `cmshead`**: `cmshead` is for cluster
   administrators/account setup, not analysis work -- if a task ends up there by
   mistake, back out rather than continuing.
+- **The default login shell on `cms-t3` is tcsh, not bash** (confirmed via the
+  account's login shell, `/bin/tcsh` in `getent passwd`). Startup file: tcsh reads
+  `~/.tcshrc` if present, otherwise `~/.cshrc` -- never both, and accounts differ
+  (at least one has only `~/.cshrc`, confirmed 2026-09-30). Before adding anything,
+  check which exists and append to that one; creating a new `~/.tcshrc` alongside an
+  existing `~/.cshrc` silently disables the `~/.cshrc`. A bare `ssh host "cmd1 && cmd2 |
+  cmd3"` gets parsed by tcsh first, which has different (and stricter) redirect
+  syntax than bash -- a literal `2>&1` or `2>/dev/null` in the remote command string
+  can trip tcsh's "Ambiguous output redirect" error before your actual command ever
+  runs. For anything with redirects or pipes, wrap it explicitly:
+  `ssh host bash -c '"...script with 2>&1 etc...\"'` (the nested literal
+  double-quotes matter -- they're what keeps the redirects intact through tcsh's
+  parsing once ssh flattens the argv into one string).
+- **`df` has been observed to hang on this cluster's login node**, on ordinary paths
+  like `~` and `~/scratch0` -- not a sign of a broken mount or a slow network on its
+  own. Avoid relying on `df` in scripted checks; if you need it, use a hard timeout
+  and don't read a hang as evidence something else is wrong.
+- **Singularity 3.5.3 is actually installed** on the login node
+  (`/usr/local/bin/singularity`) -- an earlier check here wrongly reported "no
+  container runtime at all," which was a false negative caused by exactly the tcsh
+  quoting bug above (the check's own command got mangled before it could see the
+  binary). Confirmed for real with correct quoting: `singularity` works
+  (`docker://` image pulls, `--fakeroot`, user namespaces all supported by its
+  `exec --help`); `apptainer`/`docker`/`podman` are genuinely absent. If a future
+  check reports something as "absent," reverify with the nested-double-quote
+  pattern before trusting it -- don't repeat this mistake. The CVMFS `sft.cern.ch`
+  Python/LCG mirror is separately confirmed stale (only through `LCG_98`/`LCG_99`,
+  ~2018-2019), so that one's still not a quick fix for a missing modern Python
+  stack. See `milliqan-t3-working-area-setup` for the user-space conda/mamba approach used
+  instead.
