@@ -13,6 +13,12 @@ every session that picks this up starts cold and must reconstruct where
 things stand by reading that file, not by assuming anything about what a
 prior session did.
 
+For the mechanics of launching, checking on, and resubmitting a
+`run_lpc.py` job (including the backup that must precede every
+`--resubmit-failed`), see `run-analysis-jobs`. This skill adds the
+one-dataset-per-launch queue and state-file supervision on top of it, and
+allows 3 resubmit rounds per dataset (`retry_cap`) instead of that skill's 2.
+
 ## Unit of work: one dataset, not one sample
 
 Every launch processes exactly **one dataset** -- a single key of the
@@ -36,9 +42,10 @@ piling up at the end of a sample.
 There are two independent things running, and it's important to keep them
 separate:
 
-- **The actual job**, on the LPC: `run_lpc.py --launch-tmux` launches the
+- **The actual job**, on the LPC: `run_lpc.py` runs the
   PocketCoffea/condor/dask driver inside its own `tmux` session on the LPC
-  login node. This keeps running regardless of what happens locally -- it
+  login node, launched with `tmux send-keys` as described in
+  `run-analysis-jobs`. This keeps running regardless of what happens locally -- it
   does not depend on this session, your local machine, or your terminal
   staying open.
 - **This supervision loop**, locally: periodically checks in on that job,
@@ -207,7 +214,7 @@ production."
      transfer, `create_skim_dataset_definition.py`, and this step have all
      succeeded. Then advance the queue: pop the next `pending` entry from
      `queue_order` and launch it with `-o output/skims_claude_<queue key>`
-     (`run_lpc.py --launch-tmux ...`, combining `default_run_options` with
+     (`run_lpc.py ...`, launched as in `run-analysis-jobs`, combining `default_run_options` with
      its own `run_options` if set). Immediately after launching, while
      still on the same SSH connection, capture `lpc_node` (`hostname`) and
      write it into the new entry -- see the `lpc_node` field above.
@@ -215,7 +222,8 @@ production."
      of finishing this dataset -- don't transfer it, and don't launch the
      next dataset, until its failed files have been resubmitted and it
      finishes clean. If `retries` is under the cap, resubmit with
-     `--resubmit-failed` (same `outputdir`), increment `retries`, log why.
+     `--resubmit-failed` (same `outputdir`) after the backup step in
+     `run-analysis-jobs`, increment `retries`, log why.
      If at the cap, mark `stuck` with a note and leave it -- don't keep
      retrying automatically. (This is possible only because each launch is
      a single dataset; a multi-dataset run can't be resubmitted until the

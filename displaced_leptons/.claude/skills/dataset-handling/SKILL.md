@@ -178,7 +178,7 @@ python3 scripts/datasets/create_supplement_definition.py \
 
 ## How the outputs get consumed
 
-`configs/common.py` globs both output directories for use in a PocketCoffea config:
+`lib/configuration.py` globs both output directories for use in a PocketCoffea config:
 `get_datasets("central")` -> `datasets/central/*.json` (the `"jsons"` list), and
 `get_supplements()` -> `datasets/supplements/*.json` (`cfg.supplements`).
 
@@ -188,8 +188,8 @@ keyed with the same `DatasetDefinition.key` scheme by convention:
 - **Central JSON keys are functionally meaningful.** They become PocketCoffea's fileset
   keys, which is what `--filter-datasets` (a comma-separated list) matches against when
   selecting which datasets to run.
-- **Supplement JSON keys are not read at runtime.** `workflow.py`'s
-  `load_metadata_extra` finds the right supplement entry by comparing
+- **Supplement JSON keys are not read at runtime.** `SupplementPlugin`
+  (`lib/workflow/supplement.py`) finds the right supplement entry by comparing
   `metadata["dataset"]` (the DAS name) against the central chunk's `das_names`
   metadata, then indexes `files` by the central LFN directly.
 

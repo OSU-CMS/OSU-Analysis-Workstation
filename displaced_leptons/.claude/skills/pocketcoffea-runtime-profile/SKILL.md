@@ -1,6 +1,6 @@
 ---
 name: pocketcoffea-runtime-profile
-description: Profile a PocketCoffea job to find CPU/runtime hot spots in this analysis's own code (workflow.py, object_selection.py, event_selection.py, lib/, configs/), not framework internals. Use when asked to profile a job, find what's slow, or investigate long runtimes. The upstream doc (pocketcoffea.readthedocs.io/en/stable/performance.html) assumes a runner script and executor this analysis's CLI doesn't expose -- this skill documents the corrected procedure, verified end-to-end on 2026-09-15.
+description: Profile a PocketCoffea job to find CPU/runtime hot spots in this analysis's own code (lib/, configs/), not framework internals. Use when asked to profile a job, find what's slow, or investigate long runtimes. The upstream doc (pocketcoffea.readthedocs.io/en/stable/performance.html) assumes a runner script and executor this analysis's CLI doesn't expose -- this skill documents the corrected procedure, verified end-to-end on 2026-09-15.
 ---
 
 # Profiling PocketCoffea runtime in this analysis
@@ -64,7 +64,7 @@ scp fnal-claude:/uscms_data/d3/lnestor/displaced_leptons/tmp/profiling/<label>/o
 
 Filter to this repo's own code using the `/srv/` absolute path prefix (how
 the container sees the repo root) rather than a hardcoded filename list --
-it automatically covers every file in the repo (configs/, lib/, workflow.py,
+it automatically covers every file in the repo (configs/, lib/, scripts/,
 ...) with no maintenance burden. Exclude `/srv/.env/` (the venv's editable
 install shim lives under the repo too and shows up as noise otherwise).
 
