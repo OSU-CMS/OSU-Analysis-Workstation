@@ -29,10 +29,6 @@ Setup (LPC disk only):
 | `test/2024/crab_projects/` | CRAB project dirs |
 | `test/2024/submit_batch1.sh` | Example submission loop |
 
-The older setup in `CMSSW_14_0_21` / `CMSSW_15_0_10` SignalMC (eb/emub channels,
-Pythia-level R-hadron decays, RECO in the wrong release) is legacy. Don't use or edit it.
-Its outputs are in `/store/group/lpcdisapptrks/lucas/`.
-
 ## Physics settings and why
 
 - **Releases**: steps 1-3 in CMSSW_14_0_25, step 4 (PAT+NANO) in CMSSW_15_0_10. This
@@ -88,8 +84,7 @@ output tag (`2024_vN`). `premix_files.txt` is only written if it doesn't already
 
 `--lfn-base` sets the CRAB output directory and defaults to `/store/user/lnestor/signal_mc`.
 Always pass `--lfn-base /store/user/lnestor/signal_mc_staging` with `--crab` (see Output on
-EOS). The current `test/2024/crab_*_cfg.py` files were regenerated that way on 2026-10-21;
-the previous versions are in `test/2024_crab_cfg_backup_oct21/`.
+EOS).
 
 CRAB settings baked into the template, each with a reason:
 
@@ -157,17 +152,14 @@ Tasks with more than 1000 jobs spill into `0001/`. Nothing downstream reads from
 signal_mc/StopToLB_M-<m>_CTau-<c>mm_TuneCP5_13p6TeV_madgraphMLM-pythia8/<tag>/{miniaod,nanoaod}/{miniaod,nanoaod}_<job>.root
 ```
 
-Currently all 100 points are there as `2024_v1` (20035 files of each kind, logs
-deleted). Once a task in staging is finished and checked, move its files into the final
+Once a task in staging is finished and checked, move its files into the final
 layout with `eos mv` (a namespace rename, no data copy) and delete the `log/` directory
 and the then-empty timestamp directories. Check that the mini and nano counts match
 before and after. Filenames are unique within a point and tag, but a new tag or a
 resubmission into an already-populated tag must not overwrite existing job numbers.
 
-Tasks submitted before 2026-10-21 have the old `outLFNDirBase = /store/user/lnestor/signal_mc`
-stored in the submitted task, so a `crab resubmit` of one of them stages out to
-`signal_mc/<point>/2024_v1/<timestamp>/0000/` and not to staging. Regenerating the config
-files does not change this.
+A submitted task keeps the `outLFNDirBase` it was submitted with, so a `crab resubmit`
+stages out to that directory. Regenerating the config files does not change this.
 
 ## Monitoring and failures
 
@@ -175,18 +167,12 @@ General CRAB mechanics are in the lpc-crab skill. Check each task with
 `crab status -d crab_projects/crab_StopToLB_M-<m>_CTau-<c>mm_2024_v1`. For many tasks,
 loop over `crab_projects/crab_StopToLB_*_2024_v1` and grep `Jobs status` / `failed`.
 
-Failures are normally site-specific, not physics. Known ones:
-
-| Code | Meaning here | Fix |
-|---|---|---|
-| 60328 | ASO stage-out failure (HTTP 500 at T2_IT_Bari) | resubmit, blacklist the site |
-| 50664 | wallclock exceeded (slow nodes, stalls at T2_FR_IPHC) | resubmit, blacklist the site |
-| 50660 | memory exceeded (T2_BE_IIHE) | resubmit, blacklist the site; don't raise memory unless it repeats everywhere |
-| 8901 | unexpected termination | read the job log first |
-| 8002 | corrupted DD4hep magnetic-field XML on one node (T2_US_Colorado) | resubmit |
+Failures are normally site-specific, not physics. Resubmit, blacklisting the site if the
+same one keeps failing. Don't raise memory or runtime limits unless the failure repeats
+at every site. For an unexpected termination (8901), read the job log first.
 
 ```bash
-crab resubmit -d crab_projects/crab_<request> --siteblacklist=T2_IT_Bari,T2_FR_IPHC,T2_BE_IIHE
+crab resubmit -d crab_projects/crab_<request> --siteblacklist=<site1>,<site2>
 ```
 
 ## Validation
@@ -200,9 +186,8 @@ xrootd URLs:
   decayer, so `genParticlePlusGeant` shows only their charged/visible daughters.
 - **NanoAOD content**: `LHEScaleWeight` (9), `LHEPdfWeight` (103), `PSWeight` (4), and
   `Pileup_nTrueInt` (mean ~46 for 2024).
-- **Lifetime**: done correctly, it reproduces the nominal ctau with exponential survival.
-  At 1200 GeV / 10 mm over ~48k decays it gives 9.987 +- 0.046 mm, with survival ratios
-  to exp(-x) of 1.00 at x = 0.5-4.
+- **Lifetime**: done correctly, it reproduces the nominal ctau, and the survival
+  fraction follows exp(-x) with x in units of ctau.
 
 ### Measuring the lifetime correctly
 
@@ -236,8 +221,6 @@ for q in products:
 ctau = dline * o.mass() / o.p()
 ```
 
-Reference implementation:
-`/uscms_data/d3/lnestor/signalmc_validation/pilot_v3/ctau_online.py`.
 `test/check_step1.py` uses the plain closest product, so don't use it for lifetimes.
 
 ### Collection gotchas
