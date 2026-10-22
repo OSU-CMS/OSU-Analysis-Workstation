@@ -8,7 +8,7 @@ description: Producing the closure test results for one channel and sample from 
 Goes from finished closure test job output (see `run-analysis-jobs` for producing it,
 with `configs/specific/config_<channel>_closure_test.py`) to the closure plots and
 tables. Two scripts, both in `scripts/commands/` and both run from the root of the work
-area, `/uscms_data/d3/lnestor/displaced_leptons` on the LPC. All paths below are
+area, `<analysis-dir>` on the LPC. All paths below are
 relative to that unless stated.
 
 | Script | Produces |
@@ -26,8 +26,8 @@ extrapolated ratio and the 1 and 2 sigma bands on the plots.
 Run them from the work area root, in the foreground; no grid proxy or tmux is needed:
 
 ```bash
-ssh cmslpc-claude "cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && eval \`scramv1 runtime -sh\` && \
-cd /uscms_data/d3/lnestor/displaced_leptons && python3 scripts/commands/<script>.py ..."
+ssh cmslpc-claude "cd <cmssw15-src> && eval \`scramv1 runtime -sh\` && \
+cd <analysis-dir> && python3 scripts/commands/<script>.py ..."
 ```
 
 ## 1. Locate the output and merge
@@ -48,7 +48,7 @@ one `output_<dataset>.coffea` per dataset.
 `inspect_coffea.py`, which needs only bare python (no CMSSW), from the work area root:
 
 ```bash
-ssh cmslpc-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
+ssh cmslpc-claude "cd <analysis-dir> && \
 python3 scripts/commands/inspect_coffea.py output/<dir>/output_all.coffea"
 ```
 
@@ -112,12 +112,12 @@ to put the files instead.
 
 ```bash
 mkdir -p <dest>
-scp 'cmslpc-claude:/uscms_data/d3/lnestor/displaced_leptons/<tmpdir>/*' <dest>/
+scp 'cmslpc-claude:<analysis-dir>/<tmpdir>/*' <dest>/
 rm <dest>/*.log
 ```
 
 Once the transfer succeeds, remove the temp directory on the LPC:
 
 ```bash
-ssh cmslpc-claude "rm -rf /uscms_data/d3/lnestor/displaced_leptons/<tmpdir>"
+ssh cmslpc-claude "rm -rf <analysis-dir>/<tmpdir>"
 ```

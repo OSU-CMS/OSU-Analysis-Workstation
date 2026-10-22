@@ -25,6 +25,21 @@ says to. Before treating one as the current state of the code, check it against 
 copy, since it can be stale or hold uncommitted changes that were never deployed. Read
 reference code from these local clones, not from the LPC, unless asked.
 
+## Per-user paths
+
+Skills and this file refer to per-user locations by placeholder. Their values for this
+user are in the gitignored `CLAUDE.local.md` in this directory -- read it first and
+substitute them.
+
+| Placeholder | Meaning |
+|---|---|
+| `<lpc-username>` | LPC login |
+| `<analysis-dir>` | PocketCoffea checkout on the LPC |
+| `<cmssw15-src>` | `src/` of the `CMSSW_15_0_10` area on the LPC |
+| `<cmssw14-src>` | `src/` of the `CMSSW_14_0_25` area on the LPC |
+| `<eos-base>` | EOS base for outputs this analysis writes: skims, signal MC, CRAB `outLFNDirBase` |
+| `<supplements-dir>` | EOS directory holding the supplement files |
+
 ## Mount points
 
 LPC work areas can optionally be mounted locally over SSHFS under `mnt/` (in this
@@ -50,7 +65,7 @@ Both are gitignored and created as needed.
 
 ## EOS
 
-Supplement files for this analysis live in `/store/user/lnestor/supplements`.
+Supplement files for this analysis live in `<supplements-dir>`.
 
 ## Style guidelines
 

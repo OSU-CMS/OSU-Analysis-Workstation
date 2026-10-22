@@ -33,7 +33,7 @@ A flat YAML list, one entry per physical dataset. Each entry becomes a
   nanoaod: /Muon0/Run2023C-22Sep2023_v1-v1/NANOAOD
   year: 2023_preBPix
   era: C
-  supplements_path: /store/user/lnestor/supplements/Muon0_Run2023C_v1
+  supplements_path: <supplements-dir>/Muon0_Run2023C_v1
   is_mc: false
   index: 0
   version: 1

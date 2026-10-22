@@ -77,8 +77,8 @@ before doing anything else; write it back after every action.
       "outputdir": "output/skims_claude_emu_MuonEG_2022_preEE_EraC",
       "lpc_tmux_session": "pocketcoffea-emu-muoneg",
       "lpc_node": "cmslpc308.fnal.gov",
-      "eos_staging_path": "/store/user/lnestor/skims_staging/emu/MuonEG_2022_preEE_EraC",
-      "eos_final_path": "/store/user/lnestor/skims/emu/MuonEG_2022_preEE_EraC",
+      "eos_staging_path": "<eos-base>/skims_staging/emu/MuonEG_2022_preEE_EraC",
+      "eos_final_path": "<eos-base>/skims/emu/MuonEG_2022_preEE_EraC",
       "retries": 2,
       "last_checked": "2026-09-17T14:00:00",
       "notes": ""

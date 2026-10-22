@@ -34,9 +34,9 @@ and invoke `pocket_coffea` as a module so
 `python -m cProfile` can wrap it:
 
 ```bash
-ssh cmslpc-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
+ssh cmslpc-claude "cd <analysis-dir> && \
   export APPTAINER_BINDPATH=/uscmst1b_scratch,/cvmfs,/cvmfs/grid.cern.ch/etc/grid-security:/etc/grid-security,/etc/condor/config.d/01_cmslpc_interactive,/usr/local/bin/cmslpc-local-conf.py:/usr/local/bin/cmslpc-local-conf.py.orig,.cmslpc-local-conf:/usr/local/bin/cmslpc-local-conf.py && \
-  apptainer exec -B \$(pwd):/srv -B /uscms/home/lnestor --pwd /srv \
+  apptainer exec -B \$(pwd):/srv -B /uscms/home/<lpc-username> --pwd /srv \
     /cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-analysis/general/pocketcoffea:lxplus-el9-latest \
     /bin/bash -c 'source /srv/.bashrc >/tmp/bashrc.log 2>&1; \
       export X509_USER_PROXY=<resolved-proxy-path>; \
@@ -53,12 +53,13 @@ enough per-chunk work in the profile.
 ### 3. Pull the profile back
 
 ```bash
-mkdir -p /home/lnestor/projects/analysis/displaced_leptons/tmp/profiling/<label>
-scp cmslpc-claude:/uscms_data/d3/lnestor/displaced_leptons/tmp/profiling/<label>/output.prof \
-  /home/lnestor/projects/analysis/displaced_leptons/tmp/profiling/<label>/output.prof
+mkdir -p tmp/profiling/<label>
+scp cmslpc-claude:<analysis-dir>/tmp/profiling/<label>/output.prof \
+  tmp/profiling/<label>/output.prof
 ```
 
-(`displaced_leptons/tmp/` per this workspace's convention for anything temporary.)
+(Run from this workspace directory. `tmp/` is this workspace's convention for anything
+temporary.)
 
 ### 4. Analyze with pstats -- do this yourself, don't just hand the file back
 

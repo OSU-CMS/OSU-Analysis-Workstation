@@ -12,7 +12,7 @@ to be merged into one before running any calculation/plotting script that expect
 single output file.
 
 This happens in the `displaced_leptons` project on the FNAL LPC, at
-`/uscms_data/d3/lnestor/displaced_leptons`. `scripts/merge_coffea.py` runs with plain
+`<analysis-dir>`. `scripts/merge_coffea.py` runs with plain
 system `python3` -- coffea is installed in user packages there, no apptainer shell or
 special environment needed.
 

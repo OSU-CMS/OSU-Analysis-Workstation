@@ -15,7 +15,7 @@ clones are not the source of truth -- the LPC copy has changes that were never c
 
 ## Where things live
 
-`/uscms_data/d3/lnestor/CMSSW_15_0_10/src/DisplacedLeptonsSupplement/SupplementCreation/`
+`<cmssw15-src>/DisplacedLeptonsSupplement/SupplementCreation/`
 (local sshfs mount: `mnt/lpc-supplement-cmssw-15/`).
 
 | Path | What it is |
@@ -24,7 +24,7 @@ clones are not the source of truth -- the LPC copy has changes that were never c
 | `data/datasets_full.yaml` | Input to `create_crab_configs.py` (see below) |
 | `data/datasets.yaml` | Legacy, superseded by `datasets_full.yaml`. Don't use |
 | `scripts/create_crab_configs.py` | Writes one CRAB config per dataset plus `test/submit.sh` |
-| `scripts/check_crab_jobs.py` | Checks finished tasks and moves output to `/store/user/lnestor/supplements` |
+| `scripts/check_crab_jobs.py` | Checks finished tasks and moves output to `<supplements-dir>` |
 | `scripts/reshuffle_supplements.py` | Optional, unused: rewrites per-job files into one file per input file (`--reorder`) |
 | `test/supplement_{ee,mumu,emu,met,mc}_cfg.py` | The psets, shared across eras/years |
 | `test/<request>_cfg.py` | Generated CRAB configs (gitignored) |
@@ -75,7 +75,7 @@ python create_crab_configs.py --samples DY --years 2024 --version 1 --priority 1
   move or rename the old `submit.sh` first if it is still needed.
 - Data tasks: `LumiBased`, 400 lumis/job, golden JSON per year. MC tasks: `FileBased`,
   35 files/job, `maxJobRuntimeMin = 200`. Both use 1 core, 3000 MB, `supplement.root` as the
-  only output, `outLFNDirBase = /store/user/lnestor/`, storage `T3_US_FNALLPC`.
+  only output, `outLFNDirBase = <eos-base>/`, storage `T3_US_FNALLPC`.
 
 ### pyCfgParams set per config
 
@@ -119,7 +119,7 @@ python check_crab_jobs.py
 
 For every directory in `../test/crab_projects` it checks `crab status`; a task is only
 handled when 100% finished. It moves the output to
-`/store/user/lnestor/supplements/<request name minus crab_ prefix and _supplement_vN suffix>`
+`<supplements-dir>/<request name minus crab_ prefix and _supplement_vN suffix>`
 (removing any existing destination first), then deletes the local CRAB project directory.
 `--reverse` reverses the order tasks are checked in.
 

@@ -11,7 +11,7 @@ the full calculation, but a partial calculation with only some channels present 
 fine too.
 
 This all happens in the `displaced_leptons` project on the FNAL LPC, at
-`/uscms_data/d3/lnestor/displaced_leptons`. All file paths below are relative to that.
+`<analysis-dir>`. All file paths below are relative to that.
 
 ## 1. Locate outputs and merge
 

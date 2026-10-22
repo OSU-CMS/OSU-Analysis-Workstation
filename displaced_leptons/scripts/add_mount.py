@@ -90,7 +90,7 @@ def main() -> None:
         return
 
     ssh_alias = input("SSH alias (a Host entry in ~/.ssh/config, e.g. cmslpc-claude): ").strip()
-    remote_path = input("Remote path (e.g. /uscms_data/d3/lnestor/...): ").strip()
+    remote_path = input("Remote path (e.g. /uscms_data/d3/<user>/...): ").strip()
     description = input("Short description (purpose of this mount): ").strip()
 
     if not ssh_alias or not remote_path:

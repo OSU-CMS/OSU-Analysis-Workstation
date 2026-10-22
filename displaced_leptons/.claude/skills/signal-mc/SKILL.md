@@ -1,6 +1,6 @@
 ---
 name: signal-mc
-description: Generating, submitting, monitoring and validating the Run 3 stop -> lb signal MC (long-lived stop R-hadrons) with CRAB, from SLHA/fragment/config generation through MiniAOD+NanoAOD on EOS. Use whenever a task touches signal MC, DisplacedLeptonsSupplement/SignalMC, create_signal_configs.py, run_gen_to_nano.sh, StopToLB CRAB tasks, /store/user/lnestor/signal_mc, R-hadron lifetime checks, or genParticlePlusGeant.
+description: Generating, submitting, monitoring and validating the Run 3 stop -> lb signal MC (long-lived stop R-hadrons) with CRAB, from SLHA/fragment/config generation through MiniAOD+NanoAOD on EOS. Use whenever a task touches signal MC, DisplacedLeptonsSupplement/SignalMC, create_signal_configs.py, run_gen_to_nano.sh, StopToLB CRAB tasks, <eos-base>/signal_mc, R-hadron lifetime checks, or genParticlePlusGeant.
 ---
 
 # Signal MC (stop -> lb)
@@ -13,7 +13,7 @@ RECO -> MiniAOD+NanoAOD and keeps only `miniaod.root` and `nanoaod.root`.
 ## Where things live
 
 Setup (LPC disk only):
-`/uscms_data/d3/lnestor/CMSSW_14_0_25/src/DisplacedLeptonsSupplement/SignalMC/`
+`<cmssw14-src>/DisplacedLeptonsSupplement/SignalMC/`
 
 | Path | What it is |
 |---|---|
@@ -65,16 +65,16 @@ Setup (LPC disk only):
 
 ```bash
 # CMSSW_14_0_25 env
-cd /uscms_data/d3/lnestor/CMSSW_14_0_25/src && cmsenv
+cd <cmssw14-src> && cmsenv
 cd DisplacedLeptonsSupplement/SignalMC/scripts
 python3 create_signal_configs.py --fragments                  # SLHA + fragments
 scram b                                                       # first time only, so python/ is importable
 python3 create_signal_configs.py --years 2024 --step-configs  # premix list, step1/2/3 (needs proxy for dasgoclient)
-python3 create_signal_configs.py --years 2024 --crab --lfn-base /store/user/lnestor/signal_mc_staging   # CRAB configs
+python3 create_signal_configs.py --years 2024 --crab --lfn-base <eos-base>/signal_mc_staging   # CRAB configs
 
 # CMSSW_15_0_10 env, same scripts/ dir
-cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && cmsenv
-cd /uscms_data/d3/lnestor/CMSSW_14_0_25/src/DisplacedLeptonsSupplement/SignalMC/scripts
+cd <cmssw15-src> && cmsenv
+cd <cmssw14-src>/DisplacedLeptonsSupplement/SignalMC/scripts
 python3 create_signal_configs.py --years 2024 --step4-config
 ```
 
@@ -82,8 +82,8 @@ python3 create_signal_configs.py --years 2024 --step4-config
 output tag (`2024_vN`). `premix_files.txt` is only written if it doesn't already exist.
 `--crab` only rewrites the `crab_stop_to_lb_M_*_cfg.py` files.
 
-`--lfn-base` sets the CRAB output directory and defaults to `/store/user/lnestor/signal_mc`.
-Always pass `--lfn-base /store/user/lnestor/signal_mc_staging` with `--crab` (see Output on
+`--lfn-base` sets the CRAB output directory and defaults to `<eos-base>/signal_mc`.
+Always pass `--lfn-base <eos-base>/signal_mc_staging` with `--crab` (see Output on
 EOS).
 
 CRAB settings baked into the template, each with a reason:
@@ -115,7 +115,7 @@ renew it. Run submissions in a tmux session on the LPC
 background ssh jobs have died silently.
 
 ```bash
-ssh cmslpc-claude 'tmux new -d -s signalmc-submit "bash -lc \"cd /uscms_data/d3/lnestor/CMSSW_14_0_25/src/DisplacedLeptonsSupplement/SignalMC/test/2024 && export X509_USER_PROXY=<proxy> && bash submit_batchN.sh > submit_batchN.log 2>&1\""'
+ssh cmslpc-claude 'tmux new -d -s signalmc-submit "bash -lc \"cd <cmssw14-src>/DisplacedLeptonsSupplement/SignalMC/test/2024 && export X509_USER_PROXY=<proxy> && bash submit_batchN.sh > submit_batchN.log 2>&1\""'
 ```
 
 Copy `submit_batch1.sh` with the mass/ctau lists changed. It sources
@@ -134,7 +134,7 @@ Typical values, as a baseline for judging whether a run looks healthy:
 
 ## Output on EOS
 
-Two areas, both under `/store/user/lnestor/`. List files through the redirector (see
+Two areas, both under `<eos-base>/`. List files through the redirector (see
 lpc-eos).
 
 **`signal_mc_staging/`** is where CRAB writes (`outLFNDirBase`, set by `--lfn-base`).

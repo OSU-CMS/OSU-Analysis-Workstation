@@ -21,7 +21,7 @@ LPC, not on their own machine. It contrasts with running on condor: a single pro
 on the LPC login node (`--executor iterative`, no condor workers) instead of the dask
 executor on condor.
 
-The work area is `/uscms_data/d3/lnestor/displaced_leptons` on the LPC (mounted
+The work area is `<analysis-dir>` on the LPC (mounted
 locally at `mnt/lpc-displaced-leptons/`). Run commands from its root, and read the
 LPC copy of `scripts/run_lpc.py` rather than the `ref/` clone if the two disagree.
 
@@ -43,7 +43,7 @@ ends in `tmux attach` and needs a real TTY.
 4. **Create the session in the work area, then enter the container:**
 
    ```bash
-   ssh <alias> "tmux new -d -s <session> -c /uscms_data/d3/lnestor/displaced_leptons"
+   ssh <alias> "tmux new -d -s <session> -c <analysis-dir>"
    ssh <alias> "tmux send-keys -t <session> './shell' Enter"
    ```
 
@@ -190,7 +190,7 @@ round the same day), append `_2`, `_3`, ... rather than overwriting or copying i
 (`cp -r` into an existing directory nests the copy).
 
 ```bash
-ssh <alias> "cd /uscms_data/d3/lnestor/displaced_leptons/output && cp -a <name> <name>_backup_<YYYYMMDD>"
+ssh <alias> "cd <analysis-dir>/output && cp -a <name> <name>_backup_<YYYYMMDD>"
 ```
 
 Do this on the LPC over ssh, not through the sshfs mount, which is slow. Confirm it

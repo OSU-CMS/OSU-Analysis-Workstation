@@ -59,9 +59,9 @@ tool). Replicate its `apptainer exec` invocation directly instead, substituting
 whichever image tag you want to inspect:
 
 ```bash
-ssh cmslpc-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
+ssh cmslpc-claude "cd <analysis-dir> && \
   export APPTAINER_BINDPATH=/uscmst1b_scratch,/cvmfs,/cvmfs/grid.cern.ch/etc/grid-security:/etc/grid-security,/etc/condor/config.d/01_cmslpc_interactive,/usr/local/bin/cmslpc-local-conf.py:/usr/local/bin/cmslpc-local-conf.py.orig,.cmslpc-local-conf:/usr/local/bin/cmslpc-local-conf.py && \
-  apptainer exec -B \$(pwd):/srv -B /uscms/home/lnestor --pwd /srv \
+  apptainer exec -B \$(pwd):/srv -B /uscms/home/<lpc-username> --pwd /srv \
     /cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-analysis/general/pocketcoffea:lxplus-el9-<TAG> \
     /bin/bash -c 'source /srv/.bashrc >/tmp/bashrc.log 2>&1; export X509_USER_PROXY=<resolved-proxy-path>; cd /srv && <command>'"
 ```
@@ -82,7 +82,7 @@ Notes:
   Without it you get `Exception: VOMS proxy expirend or
   non-existing`.
 - **Do not confuse this containerized environment with a bare LPC-login-node
-  Python** (e.g. `/uscms/home/lnestor/.local/lib/python3.9/site-packages/...`,
+  Python** (e.g. `/uscms/home/<lpc-username>/.local/lib/python3.9/site-packages/...`,
   found via plain `ssh cmslpc-claude python3 -c "..."` with no apptainer). That
   bare environment can have a completely different pocket_coffea/coffea/awkward
   stack (seen: Python 3.9 there vs Python 3.11 in the container; different
