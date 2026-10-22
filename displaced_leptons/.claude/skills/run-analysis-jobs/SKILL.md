@@ -16,6 +16,11 @@ conventions, and node pinning come from `lpc-remote-session`; read it first if y
 haven't this session. Skim production has extra supervision rules on top of this
 skill, see `skim-manager`.
 
+**Terminology:** when the user says to run something "locally" here, they mean on the
+LPC, not on their own machine. It contrasts with running on condor: a single process
+on the LPC login node (`--executor iterative`, no condor workers) instead of the dask
+executor on condor.
+
 The work area is `/uscms_data/d3/lnestor/displaced_leptons` on the LPC (mounted
 locally at `mnt/lpc-displaced-leptons/`). Run commands from its root, and read the
 LPC copy of `scripts/run_lpc.py` rather than the `ref/` clone if the two disagree.
@@ -268,7 +273,12 @@ first, `./shell`, `.py` config), except:
 python scripts/run_lpc.py --cfg configs/<config>.py -o output/<name> -c <chunksize> --filter-samples <sample> --executor iterative --resubmit-failed
 ```
 
-This counts as one of the 2 rounds, unless the user asks for more.
+This counts as one of the 2 rounds, unless the user asks for more. This is what the user
+means by "run locally": if they ask to run the remaining ranges locally, use this mode,
+even after the 2 rounds are used. Take a fresh backup first, as for any round. An extra
+iterative pass cleared the last 4 ranges (1 DY, 3 TTbar) of emu v5 after 2 rounds had
+left them, including 3 that had failed with XRootD "[3010] Unable to open", so that
+error can be transient.
 
 ## Fallback: stock `pocket-coffea run`
 
