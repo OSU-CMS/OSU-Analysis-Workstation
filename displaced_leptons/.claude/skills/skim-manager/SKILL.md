@@ -122,11 +122,11 @@ before doing anything else; write it back after every action.
 - `lpc_node` is the actual physical login node (e.g. `cmslpc308.fnal.gov`)
   the tmux session was launched on. `cmslpc-el9.fnal.gov` round-robins
   across several distinct nodes, and the SSH ControlMaster only persists
-  10 min, so a later `ssh fnal-claude` can land on a different node than
+  10 min, so a later `ssh cmslpc-claude` can land on a different node than
   the one actually running the session -- checking status via the alias
   alone can silently miss it. Capture this immediately after launching,
   while still on the same ControlMaster connection used to launch it
-  (`ssh fnal-claude hostname`); if that connection has already dropped,
+  (`ssh cmslpc-claude hostname`); if that connection has already dropped,
   fall back to the `lpc-locate-job` skill instead of guessing. Every later
   check of this dataset (tmux, logs) must SSH directly to `lpc_node`, not
   the round-robin alias.
@@ -158,7 +158,7 @@ production."
    beyond what's in it.
 2. For whichever dataset is `running` or `transfer_pending` (there should
    be at most one `running` at a time), SSH directly to that dataset's
-   `lpc_node` (not the `fnal-claude` round-robin alias -- a fresh
+   `lpc_node` (not the `cmslpc-claude` round-robin alias -- a fresh
    connection through the alias can land on a different physical node)
    and check its real status directly -- don't pre-check auth with
    `klist` first, just run the actual status check and read failure off

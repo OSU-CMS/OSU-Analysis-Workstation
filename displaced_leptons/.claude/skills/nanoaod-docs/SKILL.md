@@ -69,21 +69,21 @@ third with no loss of information.
 ```bash
 # 1. find a file for the dataset (from an LPC session with a valid grid proxy;
 #    resolve <resolved-proxy-path> via lpc-remote-session -- never create it)
-ssh fnal-claude "X509_USER_PROXY=<resolved-proxy-path> dasgoclient -query='file dataset=<dataset>' -limit=1"
+ssh cmslpc-claude "X509_USER_PROXY=<resolved-proxy-path> dasgoclient -query='file dataset=<dataset>' -limit=1"
 
 # 2. copy it down temporarily
-ssh fnal-claude "X509_USER_PROXY=<resolved-proxy-path> xrdcp -f root://cms-xrd-global.cern.ch/<file> /uscms_data/d3/lnestor/nanoaod_docs/tmp/<name>.root"
+ssh cmslpc-claude "X509_USER_PROXY=<resolved-proxy-path> xrdcp -f root://cms-xrd-global.cern.ch/<file> /uscms_data/d3/lnestor/nanoaod_docs/tmp/<name>.root"
 
 # 3. generate the two raw markdown docs, in a CMSSW environment
-ssh fnal-claude "cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && eval \`scramv1 runtime -sh\` && \
+ssh cmslpc-claude "cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && eval \`scramv1 runtime -sh\` && \
   python3 \$CMSSW_RELEASE_BASE/src/PhysicsTools/NanoAOD/test/inspectNanoFile.py \
     /uscms_data/d3/lnestor/nanoaod_docs/tmp/<name>.root \
     --docmd /uscms_data/d3/lnestor/nanoaod_docs/<name>_content.md \
     --sizemd /uscms_data/d3/lnestor/nanoaod_docs/<name>_size.md"
 
 # 4. delete the temp ROOT file, then scp the two raw .md files down
-ssh fnal-claude "rm /uscms_data/d3/lnestor/nanoaod_docs/tmp/<name>.root"
-scp fnal-claude:/uscms_data/d3/lnestor/nanoaod_docs/<name>_{content,size}.md /tmp/
+ssh cmslpc-claude "rm /uscms_data/d3/lnestor/nanoaod_docs/tmp/<name>.root"
+scp cmslpc-claude:/uscms_data/d3/lnestor/nanoaod_docs/<name>_{content,size}.md /tmp/
 
 # 5. merge into the single file that actually goes in reference/
 python3 .claude/skills/nanoaod-docs/scripts/merge_content_size.py \

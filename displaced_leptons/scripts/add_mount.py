@@ -89,7 +89,7 @@ def main() -> None:
         print(f"'{name}' is already in {MOUNT_CONFIG}.")
         return
 
-    ssh_alias = input("SSH alias (a Host entry in ~/.ssh/config, e.g. fnal-claude): ").strip()
+    ssh_alias = input("SSH alias (a Host entry in ~/.ssh/config, e.g. cmslpc-claude): ").strip()
     remote_path = input("Remote path (e.g. /uscms_data/d3/lnestor/...): ").strip()
     description = input("Short description (purpose of this mount): ").strip()
 

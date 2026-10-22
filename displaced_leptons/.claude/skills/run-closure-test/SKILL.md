@@ -26,7 +26,7 @@ extrapolated ratio and the 1 and 2 sigma bands on the plots.
 Run them from the work area root, in the foreground; no grid proxy or tmux is needed:
 
 ```bash
-ssh fnal-claude "cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && eval \`scramv1 runtime -sh\` && \
+ssh cmslpc-claude "cd /uscms_data/d3/lnestor/CMSSW_15_0_10/src && eval \`scramv1 runtime -sh\` && \
 cd /uscms_data/d3/lnestor/displaced_leptons && python3 scripts/commands/<script>.py ..."
 ```
 
@@ -48,7 +48,7 @@ one `output_<dataset>.coffea` per dataset.
 `inspect_coffea.py`, which needs only bare python (no CMSSW), from the work area root:
 
 ```bash
-ssh fnal-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
+ssh cmslpc-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
 python3 scripts/commands/inspect_coffea.py output/<dir>/output_all.coffea"
 ```
 
@@ -112,12 +112,12 @@ to put the files instead.
 
 ```bash
 mkdir -p <dest>
-scp 'fnal-claude:/uscms_data/d3/lnestor/displaced_leptons/<tmpdir>/*' <dest>/
+scp 'cmslpc-claude:/uscms_data/d3/lnestor/displaced_leptons/<tmpdir>/*' <dest>/
 rm <dest>/*.log
 ```
 
 Once the transfer succeeds, remove the temp directory on the LPC:
 
 ```bash
-ssh fnal-claude "rm -rf /uscms_data/d3/lnestor/displaced_leptons/<tmpdir>"
+ssh cmslpc-claude "rm -rf /uscms_data/d3/lnestor/displaced_leptons/<tmpdir>"
 ```

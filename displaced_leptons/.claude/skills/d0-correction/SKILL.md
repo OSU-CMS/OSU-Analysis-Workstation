@@ -72,7 +72,7 @@ this workspace, not the LPC). Transfer everything in the temp directory.
 - If `plots/d0_correction/v<N>` already exists locally, don't write into it -- ask the
   user where to place the new plots instead.
 - Otherwise, create `plots/d0_correction/v<N>` and scp all files from
-  `fnal-claude:<tmpdir>/` (the directory created in step 2) into it.
+  `cmslpc-claude:<tmpdir>/` (the directory created in step 2) into it.
 - Once the scp succeeds, remove the temp directory on the LPC (`rm -rf <tmpdir>`).
 
 ## 4. Summarize

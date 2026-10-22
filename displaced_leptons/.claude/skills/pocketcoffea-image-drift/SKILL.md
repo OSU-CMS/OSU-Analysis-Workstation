@@ -39,7 +39,7 @@ suspect this.
 ### 1. List available image tags and their build dates
 
 ```bash
-ssh fnal-claude "ls -la /cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-analysis/general/ | grep -i pocketcoffea"
+ssh cmslpc-claude "ls -la /cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-analysis/general/ | grep -i pocketcoffea"
 ```
 
 Each tag is a symlink; the `ls -la` timestamp is roughly the build/publish
@@ -59,7 +59,7 @@ tool). Replicate its `apptainer exec` invocation directly instead, substituting
 whichever image tag you want to inspect:
 
 ```bash
-ssh fnal-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
+ssh cmslpc-claude "cd /uscms_data/d3/lnestor/displaced_leptons && \
   export APPTAINER_BINDPATH=/uscmst1b_scratch,/cvmfs,/cvmfs/grid.cern.ch/etc/grid-security:/etc/grid-security,/etc/condor/config.d/01_cmslpc_interactive,/usr/local/bin/cmslpc-local-conf.py:/usr/local/bin/cmslpc-local-conf.py.orig,.cmslpc-local-conf:/usr/local/bin/cmslpc-local-conf.py && \
   apptainer exec -B \$(pwd):/srv -B /uscms/home/lnestor --pwd /srv \
     /cvmfs/unpacked.cern.ch/gitlab-registry.cern.ch/cms-analysis/general/pocketcoffea:lxplus-el9-<TAG> \
@@ -83,7 +83,7 @@ Notes:
   non-existing`.
 - **Do not confuse this containerized environment with a bare LPC-login-node
   Python** (e.g. `/uscms/home/lnestor/.local/lib/python3.9/site-packages/...`,
-  found via plain `ssh fnal-claude python3 -c "..."` with no apptainer). That
+  found via plain `ssh cmslpc-claude python3 -c "..."` with no apptainer). That
   bare environment can have a completely different pocket_coffea/coffea/awkward
   stack (seen: Python 3.9 there vs Python 3.11 in the container; different
   major awkward version). Debugging or reading source there tells you nothing
@@ -94,12 +94,12 @@ Notes:
 
 ```bash
 # md5sum first to find which files actually changed
-ssh fnal-claude "... apptainer exec ... pocketcoffea:lxplus-el9-<OLD_TAG> ... 'md5sum /usr/local/lib/python3.11/site-packages/pocket_coffea/workflows/base.py ...'"
-ssh fnal-claude "... apptainer exec ... pocketcoffea:lxplus-el9-latest ... 'md5sum /usr/local/lib/python3.11/site-packages/pocket_coffea/workflows/base.py ...'"
+ssh cmslpc-claude "... apptainer exec ... pocketcoffea:lxplus-el9-<OLD_TAG> ... 'md5sum /usr/local/lib/python3.11/site-packages/pocket_coffea/workflows/base.py ...'"
+ssh cmslpc-claude "... apptainer exec ... pocketcoffea:lxplus-el9-latest ... 'md5sum /usr/local/lib/python3.11/site-packages/pocket_coffea/workflows/base.py ...'"
 
 # then cat each version to a local file and diff
-ssh fnal-claude "... 'cat /usr/local/.../base.py'" > /tmp/base_old.py
-ssh fnal-claude "... 'cat /usr/local/.../base.py'" > /tmp/base_new.py
+ssh cmslpc-claude "... 'cat /usr/local/.../base.py'" > /tmp/base_old.py
+ssh cmslpc-claude "... 'cat /usr/local/.../base.py'" > /tmp/base_new.py
 diff /tmp/base_old.py /tmp/base_new.py
 ```
 
