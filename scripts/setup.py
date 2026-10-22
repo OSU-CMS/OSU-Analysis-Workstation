@@ -18,7 +18,10 @@ Does three things:
      production you have set up -- leave any/all blank if you don't have
      them yet and use the disapptrks-lpc-working-area-setup skill to create
      one first. Records everything in CLAUDE.local.md (prose, for Claude to
-     read). Deliberately doesn't ask for a grid proxy path -- the
+     read). If displaced_leptons was selected, also asks for its work-area
+     paths (analysis dir, CMSSW_15/14 src/ dirs, EOS bases), each defaulting to
+     the standard layout, and writes them to displaced_leptons/CLAUDE.local.md
+     along with a matching .mount-config. Deliberately doesn't ask for a grid proxy path -- the
      lpc-remote-session skill checks the voms-proxy-init default and the LPC
      home-directory convention live, each session, rather than trusting a
      path recorded once and possibly gone stale.
@@ -260,6 +263,80 @@ def setup_local_config(selected_analyses: list[str]) -> None:
             claude_local_text += f"  - CMSSW_{release}: {path}\n"
     claude_local.write_text(claude_local_text)
     print(f"Wrote {claude_local}.")
+
+    if "displaced_leptons" in selected_analyses:
+        setup_displaced_leptons(username, sshfs_works)
+
+
+DL_SSH_ALIAS = "cmslpc-claude"
+DL_DEFAULT_SUPPLEMENTS_DIR = "/store/user/lnestor/supplements"
+
+# (mount name, placeholder holding the remote path, purpose)
+DL_MOUNTS = [
+    ("lpc-displaced-leptons", "<analysis-dir>", "Run 3 PocketCoffea-based analysis code"),
+    ("lpc-supplement-cmssw-15", "<cmssw15-src>", "Supplement file generation, signal MC generation step 4"),
+    ("lpc-supplement-cmssw-14", "<cmssw14-src>", "Signal MC generation steps 1 to 3"),
+]
+
+
+def prompt_default(label: str, default: str) -> str:
+    return input(f"  {label} [{default}]: ").strip() or default
+
+
+def write_unless_declined(path: Path, text: str) -> None:
+    if path.exists() and input(f"{path} exists. Overwrite? [y/N] ").strip().lower() != "y":
+        print(f"Left {path} unchanged.")
+        return
+    path.write_text(text)
+    print(f"Wrote {path}.")
+
+
+def setup_displaced_leptons(username: str, sshfs_works: bool) -> None:
+    print(
+        "\ndisplaced_leptons: press Enter to accept the standard layout, or type a "
+        "path if yours differs. If you don't have these areas yet, ask Claude to run "
+        "the working-area-setup skill, then re-run this script."
+    )
+    root = prompt_default("Work-area root", f"/uscms_data/d3/{username}/displaced_leptons")
+    values = {
+        "<lpc-username>": username,
+        "<analysis-dir>": prompt_default("Analysis dir", f"{root}/analysis"),
+        "<cmssw15-src>": prompt_default("CMSSW_15_0_10 src/", f"{root}/CMSSW_15_0_10/src"),
+        "<cmssw14-src>": prompt_default("CMSSW_14_0_25 src/", f"{root}/CMSSW_14_0_25/src"),
+        "<eos-base>": prompt_default("EOS base", f"/store/user/{username}"),
+        "<supplements-dir>": prompt_default("Supplements dir", DL_DEFAULT_SUPPLEMENTS_DIR),
+    }
+
+    text = (
+        "(Machine-specific, not shared)\n\n"
+        "Values for the placeholders documented in CLAUDE.md:\n\n"
+        "| Placeholder | Value |\n|---|---|\n"
+    )
+    for placeholder, value in values.items():
+        text += f"| `{placeholder}` | `{value}` |\n"
+
+    mount_config = ""
+    if sshfs_works:
+        text += (
+            "\nLPC work areas mounted locally over SSHFS under `mnt/`:\n\n"
+            "| Mount point | Remote path | Purpose |\n|---|---|---|\n"
+        )
+        mount_config = (
+            "# LPC work areas mounted locally over sshfs -- see scripts/mount.sh and the\n"
+            '# "Mount points" section of CLAUDE.md.\n'
+            "#\n"
+            "# One entry per line: name:ssh_alias:remote_path[:local_path]\n"
+            "# ssh_alias is a Host entry from ~/.ssh/config. local_path defaults to name,\n"
+            "# and is resolved under mnt/.\n"
+        )
+        for name, placeholder, purpose in DL_MOUNTS:
+            text += f"| `mnt/{name}/` | `{values[placeholder]}` | {purpose} |\n"
+            mount_config += f"{name}:{DL_SSH_ALIAS}:{values[placeholder]}\n"
+
+    analysis_dir = ROOT / "displaced_leptons"
+    write_unless_declined(analysis_dir / "CLAUDE.local.md", text)
+    if mount_config:
+        write_unless_declined(analysis_dir / ".mount-config", mount_config)
 
 
 def main() -> None:
