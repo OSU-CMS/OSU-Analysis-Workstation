@@ -60,8 +60,29 @@ disapptrks make-fiducial-map \
 
 (`--flavor muon` for the muon map.) Hot spots use `--threshold 2.0` by default; for an
 era with one pathological high-inefficiency bin inflating the stddev, add
-`--stddev-exclude-top 1` (excludes only that bin from the stddev calculation -- it is
-still tested and can still be reported as a hot spot).
+`--stddev-exclude-top N` (excludes the N worst bins from the stddev calculation only --
+they are still tested and still reported as hot spots).
+
+**Outlier guard (LPC checkout 2026-11-02, uncommitted at time of writing):** the command
+now **refuses to write** a map with no hot spots or where one bin carries > 50% of the
+variance (`top_bin_variance_share`, stored in every JSON), exiting 2, unless a sigma fix
+(`--stddev-exclude-top N` / `--stddev-clip K`) or `--allow-outlier-dominated` is given.
+Normal Run-3 maps sit at 0.04-0.16; the 2024 electron map is 0.78 (5 hot spots with the
+legacy sigma; the published v2 map used `--stddev-exclude-top 2` -> 91). `--stddev-clip K`
+(iterative sigma clipping of mean and stddev) is available but is **not** the default: at
+K=5 it adds 13-49% more hot spots to normal electron maps and doubles muon ones, and on
+muon maps (mostly zero-inefficiency bins) K=3 drives the stddev to 0 and finds no hot
+spots at all. Recalibrated jets (`DISAPPTRKS_PUPPI_METNOMU=1`) leave the 2023C/D maps
+unchanged (electron identical, muon 2023D 93 vs 95 hot spots).
+
+**2023C muon map, fixed on EOS 2026-11-04:** EOS `muon_fiducial_map_2023C_v2.json` was a copy of
+the 2023D map (metadata `run_period: 2023D`, 95 hot spots) until Matt replaced it with
+`data/fiducial_maps/muon_fiducial_map_2023C_v2_fixed.json` (`run_period: 2023C`, 113 hot spots, built from
+`analysis_output/2023C_muon_fiducialmap_dask_v2`); the old copy is kept as
+`muon_fiducial_map_2023C_v2_old.json`. Its hot spots are identical to the
+`analysis_output/2023C/fiducial_maps_Muon_puppi_v1` map, which the PUPPI background production
+(`_dedx_puppi_v1`, `_dedx_puppi_jetid_v1`) used via `DISAPPTRKS_MUON_FIDUCIAL_MAP_JSON`. 2023C muon outputs
+that auto-resolved the map before 2026-11-04 used the 2023D copy.
 
 Pveto jobs resolve maps automatically from the group's shared EOS space
 (`root://cmseos.fnal.gov//store/group/lpcdisapptrks/fiducialmaps`), based on the

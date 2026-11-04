@@ -18,6 +18,11 @@ slide comes from a real output file (or from the user), produced by the relevant
 
 Ask (per `hep-slides` step 0), plus these analysis-specific points:
 
+- **The presentation's name** -- it sets the new deck's directory under `slides/` and the
+  PDF name. Never overwrite or modify an existing talk (`slides/status_update/`,
+  `slides/method_overview/`, their PDFs, or shared `slides/figures/` files) unless the
+  user is specifically editing that talk; give a new deck its own `figures/` folder.
+
 - **Which run periods** (2022CD, 2022EFG, 2023C, 2023D, 2024, 2025 ...) and which
   layer bins (`NLayers4`/`NLayers5`/`NLayers6plus`/`combinedBins`) the talk covers.
 - **Which checkout produced the outputs.** Confirm
