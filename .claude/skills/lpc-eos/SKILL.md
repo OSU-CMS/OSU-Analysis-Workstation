@@ -61,8 +61,8 @@ xrdcp ./<file> root://cmseos.fnal.gov//store/user/<username>/<path>/<file>
 ```
 
 If a copy or write fails with a permission/auth error, the operation may need the grid
-certificate proxy set explicitly (see the root or analysis `CLAUDE.md`'s mount/proxy
-conventions):
+certificate proxy set explicitly (resolve its path with `lpc-remote-session`'s
+check-never-create sequence -- never create or refresh the proxy yourself):
 
 ```bash
 ssh <lpc-host-alias> "X509_USER_PROXY=<grid-proxy-path> xrdcp ..."

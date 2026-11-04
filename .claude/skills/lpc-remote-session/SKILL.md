@@ -111,7 +111,9 @@ ssh <lpc-host-alias> "tmux new -d -s <session-name> '<command>'"
   tracking when you create the session), and if they differ, retry against that
   specific node directly (e.g. `ssh <lpc-username>@cmslpc373.fnal.gov` rather than the
   round-robin alias) -- `ssh` to a bare hostname needs the username spelled out
-  explicitly since the alias's `User` mapping doesn't apply.
+  explicitly since the alias's `User` mapping doesn't apply. If the job is still
+  running but the node was never recorded, `lpc-locate-job` recovers it from the
+  condor workers' scheduler address.
 
 ## Checking on a long job without blocking
 

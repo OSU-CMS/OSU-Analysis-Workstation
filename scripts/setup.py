@@ -2,7 +2,7 @@
 """One-time local setup for this workspace. Run once per machine.
 
 Modeled on the group's earlier workstation/scripts/setup.sh (bash), rewritten
-in Python to match this repo's scripts/ convention (setup.py, mount_remote.py).
+in Python to match this repo's scripts/ convention.
 
 Does three things:
   1. Checks ~/.ssh/config for an LPC host alias and a dedicated,
@@ -18,39 +18,54 @@ Does three things:
      production you have set up -- leave any/all blank if you don't have
      them yet and use the disapptrks-lpc-working-area-setup skill to create
      one first. Records everything in CLAUDE.local.md (prose, for Claude to
-     read) and .mount-config.local.sh (shell variables, for fnal-mount.sh /
-     scripts/mount_remote.py once that's implemented). Deliberately doesn't
-     ask for a grid proxy path -- the lpc-remote-session skill checks the
-     voms-proxy-init default and the LPC home-directory convention live,
-     each session, rather than trusting a path recorded once and possibly
-     gone stale.
+     read). If displaced_leptons was selected, also asks for its work-area
+     paths (analysis dir, CMSSW_15/14 src/ dirs, EOS bases), each defaulting to
+     the standard layout, and writes them to displaced_leptons/CLAUDE.local.md
+     along with a matching .mount-config. Deliberately doesn't ask for a grid proxy path -- the
+     lpc-remote-session skill checks the voms-proxy-init default and the LPC
+     home-directory convention live, each session, rather than trusting a
+     path recorded once and possibly gone stale.
 """
 
 from __future__ import annotations
 
 import re
+import shlex
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SSH_CONFIG = Path.home() / ".ssh" / "config"
 
-# Extend this as each analysis's own CLAUDE.md fills in its real
-# reference-clone table. Only disappearing_tracks has one as of this writing --
-# see disappearing_tracks/CLAUDE.md's "Reference clones (ref/)" section.
-ANALYSIS_REF_CLONES: dict[str, list[tuple[str, str]]] = {
+# Extend this as each analysis's own CLAUDE.md fills in its real reference-clone table.
+ANALYSIS_REF_CLONES: dict[str, list[dict[str, str]]] = {
     "disappearing_tracks": [
-        ("git@github.com:OSU-CMS/DisappTrks_Nano.git", "ref/DisappTrks_Nano"),
-        ("git@github.com:OSU-CMS/DisappTrks.git", "ref/DisappTrks"),
-        ("git@github.com:OSU-CMS/OSUNano.git", "ref/OSUNano"),
-        ("git@github.com:PocketCoffea/PocketCoffea.git", "ref/PocketCoffea"),
+        {"url": "git@github.com:OSU-CMS/DisappTrks_Nano.git", "path": "ref/DisappTrks_Nano"},
+        {"url": "git@github.com:OSU-CMS/DisappTrks.git", "path": "ref/DisappTrks"},
+        {"url": "git@github.com:OSU-CMS/OSUNano.git", "path": "ref/OSUNano"},
     ],
+    "displaced_leptons": [
+        {"url": "git@github.com:lnestor/displaced_leptons.git", "path": "ref/displaced_leptons"},
+        {"url": "git@github.com:lnestor/DisplacedLeptonsSupplement.git", "path": "ref/DisplacedLeptonsSupplement"},
+        {"url": "git@github.com:DisplacedSUSY/DisplacedSUSY.git", "path": "ref/DisplacedSUSY"},
+        {"url": "git@github.com:OSU-CMS/OSUT3Analysis.git", "path": "ref/OSUT3Analysis"},
+    ]
 }
 
+CMSSW_SPARSE_DIRS = ["CommonTools", "Configuration", "DataFormats", "FWCore", "HLTrigger", "PhysicsTools"]
+
 # Group-wide read-only references (not tied to one analysis), cloned into the
-# root references/ directory. See references/README.md.
-ROOT_REF_CLONES: list[tuple[str, str]] = [
-    ("git@github.com:OSU-CMS/OSU-Agentic-Analysis.git", "references/OSU-Agentic-Analysis"),
+# root ref/ directory.
+ROOT_REF_CLONES: list[dict[str, str | list[str]]] = [
+    {"url": "git@github.com:OSU-CMS/OSU-Agentic-Analysis.git", "path": "ref/OSU-Agentic-Analysis"},
+    {"url": "git@github.com:PocketCoffea/PocketCoffea.git", "path": "ref/PocketCoffea"},
+    {"url": "git@github.com:scikit-hep/coffea.git", "path": "ref/coffea", "tag": "v0.7.29"},
+    {"url": "git@github.com:scikit-hep/awkward.git", "path": "ref/awkward", "tag": "v1.10.5"},
+    {"url": "git@github.com:cms-nanoAOD/correctionlib.git", "path": "ref/correctionlib", "tag": "v2.7.0"},
+    {"url": "git@github.com:CoffeaTeam/lpcjobqueue.git", "path": "ref/lpcjobqueue", "tag": "v0.5.0"},
+    {"url": "git@github.com:scikit-hep/uproot5.git", "path": "ref/uproot", "tag": "v4.3.7"},
+    {"url": "git@github.com:cms-sw/cmssw.git", "path": "ref/CMSSW_15_0_10", "tag": "CMSSW_15_0_10", "args": "--depth 1", "sparse": CMSSW_SPARSE_DIRS},
+    {"url": "git@github.com:cms-sw/cmssw.git", "path": "ref/CMSSW_14_0_21", "tag": "CMSSW_14_0_21", "args": "--depth 1", "sparse": CMSSW_SPARSE_DIRS},
 ]
 
 
@@ -59,15 +74,28 @@ def discover_analyses() -> list[str]:
         p.name
         for p in ROOT.iterdir()
         if p.is_dir() and (p / "CLAUDE.md").exists()
-    )
+)
 
 
-def clone_if_missing(url: str, dest: Path) -> None:
+def clone_if_missing(clone: dict[str, str | list[str]], base: Path) -> None:
+    dest = base / clone["path"]
     if dest.exists():
         print(f"Already exists, skipping: {dest}")
         return
     dest.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(["git", "clone", url, str(dest)], check=True)
+    sparse = clone.get("sparse")
+    cmd = ["git", "clone"]
+    if "tag" in clone:
+        cmd += ["--branch", clone["tag"]]
+    if sparse:
+        cmd += ["--no-checkout", "--filter=blob:none"]
+    cmd += shlex.split(clone.get("args", ""))
+    cmd += [clone["url"], str(dest)]
+    subprocess.run(cmd, check=True)
+    if sparse:
+        subprocess.run(["git", "-C", str(dest), "sparse-checkout", "init", "--cone"], check=True)
+        subprocess.run(["git", "-C", str(dest), "sparse-checkout", "set", *sparse], check=True)
+        subprocess.run(["git", "-C", str(dest), "checkout"], check=True)
 
 
 def _find_cmslpc_username(text: str) -> str | None:
@@ -164,8 +192,8 @@ def setup_analyses() -> list[str]:
         print("No analysis directories with a CLAUDE.md found.")
         return []
 
-    for url, rel_dest in ROOT_REF_CLONES:
-        clone_if_missing(url, ROOT / rel_dest)
+    for clone in ROOT_REF_CLONES:
+        clone_if_missing(clone, ROOT)
 
     print("\nAnalyses available:", ", ".join(analyses))
     chosen = input("Which do you want to set up? (comma-separated, or 'all') ").strip()
@@ -187,8 +215,8 @@ def setup_analyses() -> list[str]:
                 "once its lead has filled that table in."
             )
             continue
-        for url, rel_dest in ref_clones:
-            clone_if_missing(url, ROOT / name / rel_dest)
+        for clone in ref_clones:
+            clone_if_missing(clone, ROOT / name)
 
     return valid_selected
 
@@ -236,22 +264,79 @@ def setup_local_config(selected_analyses: list[str]) -> None:
     claude_local.write_text(claude_local_text)
     print(f"Wrote {claude_local}.")
 
-    mount_config = ROOT / ".mount-config.local.sh"
-    mount_config_text = (
-        "# Generated by scripts/setup.py -- per-machine, gitignored.\n"
-        f'LPC_USERNAME="{username}"\n'
-        f'SSHFS_WORKS={"1" if sshfs_works else "0"}\n'
+    if "displaced_leptons" in selected_analyses:
+        setup_displaced_leptons(username, sshfs_works)
+
+
+DL_SSH_ALIAS = "cmslpc-claude"
+DL_DEFAULT_SUPPLEMENTS_DIR = "/store/user/lnestor/supplements"
+
+# (mount name, placeholder holding the remote path, purpose)
+DL_MOUNTS = [
+    ("lpc-displaced-leptons", "<analysis-dir>", "Run 3 PocketCoffea-based analysis code"),
+    ("lpc-supplement-cmssw-15", "<cmssw15-src>", "Supplement file generation, signal MC generation step 4"),
+    ("lpc-supplement-cmssw-14", "<cmssw14-src>", "Signal MC generation steps 1 to 3"),
+]
+
+
+def prompt_default(label: str, default: str) -> str:
+    return input(f"  {label} [{default}]: ").strip() or default
+
+
+def write_unless_declined(path: Path, text: str) -> None:
+    if path.exists() and input(f"{path} exists. Overwrite? [y/N] ").strip().lower() != "y":
+        print(f"Left {path} unchanged.")
+        return
+    path.write_text(text)
+    print(f"Wrote {path}.")
+
+
+def setup_displaced_leptons(username: str, sshfs_works: bool) -> None:
+    print(
+        "\ndisplaced_leptons: press Enter to accept the standard layout, or type a "
+        "path if yours differs. If you don't have these areas yet, ask Claude to run "
+        "the working-area-setup skill, then re-run this script."
     )
-    for release in ("13", "15", "16"):
-        mount_config_text += (
-            f'DISAPPTRKS_CMSSW{release}_PATH="{disapptrks_cmssw_paths.get(release, "")}"\n'
+    root = prompt_default("Work-area root", f"/uscms_data/d3/{username}/displaced_leptons")
+    values = {
+        "<lpc-username>": username,
+        "<analysis-dir>": prompt_default("Analysis dir", f"{root}/analysis"),
+        "<cmssw15-src>": prompt_default("CMSSW_15_0_10 src/", f"{root}/CMSSW_15_0_10/src"),
+        "<cmssw14-src>": prompt_default("CMSSW_14_0_25 src/", f"{root}/CMSSW_14_0_25/src"),
+        "<eos-base>": prompt_default("EOS base", f"/store/user/{username}"),
+        "<supplements-dir>": prompt_default("Supplements dir", DL_DEFAULT_SUPPLEMENTS_DIR),
+    }
+
+    text = (
+        "(Machine-specific, not shared)\n\n"
+        "Values for the placeholders documented in CLAUDE.md:\n\n"
+        "| Placeholder | Value |\n|---|---|\n"
+    )
+    for placeholder, value in values.items():
+        text += f"| `{placeholder}` | `{value}` |\n"
+
+    mount_config = ""
+    if sshfs_works:
+        text += (
+            "\nLPC work areas mounted locally over SSHFS under `mnt/`:\n\n"
+            "| Mount point | Remote path | Purpose |\n|---|---|---|\n"
         )
-    mount_config_text += (
-        "\n# Mount-table entries go here once scripts/mount_remote.py defines\n"
-        "# their expected format -- not yet implemented.\n"
-    )
-    mount_config.write_text(mount_config_text)
-    print(f"Wrote {mount_config}.")
+        mount_config = (
+            "# LPC work areas mounted locally over sshfs -- see scripts/mount.sh and the\n"
+            '# "Mount points" section of CLAUDE.md.\n'
+            "#\n"
+            "# One entry per line: name:ssh_alias:remote_path[:local_path]\n"
+            "# ssh_alias is a Host entry from ~/.ssh/config. local_path defaults to name,\n"
+            "# and is resolved under mnt/.\n"
+        )
+        for name, placeholder, purpose in DL_MOUNTS:
+            text += f"| `mnt/{name}/` | `{values[placeholder]}` | {purpose} |\n"
+            mount_config += f"{name}:{DL_SSH_ALIAS}:{values[placeholder]}\n"
+
+    analysis_dir = ROOT / "displaced_leptons"
+    write_unless_declined(analysis_dir / "CLAUDE.local.md", text)
+    if mount_config:
+        write_unless_declined(analysis_dir / ".mount-config", mount_config)
 
 
 def main() -> None:

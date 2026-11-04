@@ -25,16 +25,15 @@ it. `disappearing_tracks/` is the first fully real instance of this pattern;
      second, SSH-multiplexed alias (conventionally `cmslpc-claude`) reserved for
      Claude's own repeated automated connections, so they reuse one authenticated
      connection instead of paying a fresh Kerberos/GSSAPI handshake per command.
-   - Clones the group-wide reference (`references/OSU-Agentic-Analysis`), then asks
+   - Clones the group-wide reference (`ref/OSU-Agentic-Analysis`), then asks
      which analyses you want (e.g. `disappearing_tracks`) and clones that analysis's
      reference repos into `<analysis>/ref/` (e.g. `DisappTrks_Nano`, `DisappTrks`,
      `OSUNano`, `PocketCoffea`). Anything already present is skipped.
    - Asks for your LPC username, whether sshfs mounting works on this machine, and
      (if you chose `disappearing_tracks`) which of the CMSSW_13/15/16
      CRAB/NanoAOD-production work areas you already have. These are recorded in
-     `CLAUDE.local.md` (prose for Claude) and `.mount-config.local.sh` (shell
-     variables), both gitignored. A grid-proxy path is deliberately *not* recorded;
-     it's checked live each session.
+     `CLAUDE.local.md` (prose for Claude), gitignored. A grid-proxy path is
+     deliberately *not* recorded; it's checked live each session.
 
 3. **(Optional) Create a fresh LPC working area.** If you need new CMSSW releases
    rather than just cloning existing ones, run Claude Code from
@@ -62,7 +61,7 @@ it. `disappearing_tracks/` is the first fully real instance of this pattern;
 - **Root `CLAUDE.md` and `.claude/skills/`** hold what every analysis shares:
   server/LPC access conventions, and generic tool skills (`lpc-crab`, `lpc-eos`,
   `lpc-remote-session`, `lpc-root`, `pocketcoffea-conventions`, `python-style` -- see
-  [`.claude/skills/README.md`](.claude/skills/README.md)).
+  [`.claude/skills/`](.claude/skills/)).
 - **Each analysis is its own directory** with its own nested `CLAUDE.md` and
   `.claude/skills/` for anything only it needs -- run Claude Code from inside that
   directory. `disappearing_tracks/` has the fullest set so far: job submission and
