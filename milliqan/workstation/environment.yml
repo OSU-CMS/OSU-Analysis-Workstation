@@ -1,0 +1,19 @@
+# Shared analysis env for the milliqan workstation (installed by provision/30_env.sh).
+# uproot/awkward are pinned to the versions MilliQanUprootTutorial2024.ipynb requires
+# (it warns older ones don't work). The numpy/pandas pins needed on cms-t3 were for
+# its pre-x86-64-v2 CPU and aren't needed on this machine's Haswell CPU.
+name: milliqan
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - uproot=5.5.1
+  - awkward=2.7.1
+  - awkward-pandas
+  - hist
+  - numpy
+  - pandas
+  - matplotlib
+  - root
+  - jupyterlab
+  - ipykernel

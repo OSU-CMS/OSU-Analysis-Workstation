@@ -151,10 +151,16 @@ queries, or ask the user, if the schedd list above goes stale.) Don't declare a 
   which one `kinit` writes to). Compare the `Ticket cache:` line, and have them run
   `kinit -c FILE:/tmp/krb5cc_<uid>` (a `KCM:` cache is often unreachable from a sandboxed
   subprocess even when `klist` can read it).
-- **`REMOTE HOST IDENTIFICATION HAS CHANGED`**: the `cmslpc` alias round-robins across login
-  nodes with different host keys, so this recurs. It's benign here, but only remove the
-  stale line once the user has said so (`ssh-keygen -R cmslpc-el9.fnal.gov`, then reconnect
-  with `-o StrictHostKeyChecking=accept-new`).
+- **`REMOTE HOST IDENTIFICATION HAS CHANGED`**: `cmslpc-el9.fnal.gov` is one IP behind a
+  load balancer, and each login node behind it has its own host key, so connecting
+  through an alias (`cmslpc`, `cmslpc-claude`) fails strict checking whenever it lands on
+  a node other than the last-accepted one. Don't edit `known_hosts` (`ssh-keygen -R`,
+  `accept-new`, keyscanning) -- it doesn't stick, and the user declined it. Instead check
+  `~/.ssh/config` for a `Host cmslpc*.fnal.gov` block: `Host` patterns match the name typed
+  on the command line, not the resolved `HostName`, so the user's own host-key policy for
+  LPC nodes only applies when connecting by full name. Connect as
+  `ssh <lpc-username>@cmslpc-el9.fnal.gov` (username spelled out, as with any bare hostname); this
+  loses the `cmslpc-claude` multiplexing but works.
 - **`bash -l script.sh arg1 arg2` clobbers positional parameters**: the LPC login-profile
   scripts `set --`, so `$1`/`$2` come out wrong (one run wrote to a file literally named
   `=`). Pass values as environment variables (`VAR=x bash -l script.sh`) instead.

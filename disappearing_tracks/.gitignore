@@ -1,0 +1,6 @@
+# Only CLAUDE.md, skills and docs live in the group repo (same convention as
+# displaced_leptons/). Work products stay local or on EOS.
+limits/
+slides/
+analysis_note/
+.claude/skills/*-workspace/

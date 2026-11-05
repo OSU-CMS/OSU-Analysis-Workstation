@@ -5,3 +5,10 @@ CLAUDE.local.md
 
 **/mnt/
 **/.mount-config
+
+# Personal Claude Code settings (not shared)
+.claude/settings.local.json
+
+# OS / Python junk
+.DS_Store
+__pycache__/

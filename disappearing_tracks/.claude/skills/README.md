@@ -104,3 +104,18 @@ itself be written (cuts, categories, histograms, weights) -- as opposed to which
 mode/CLI command to run -- see the root `pocketcoffea-conventions` skill, cross-linked
 from the physics skills above. Its `ref/PocketCoffea` clone lives in the reference-clone
 table in this analysis's `CLAUDE.md`.
+
+- `disapptrks-systematics/` -- compute, review, or explain the Run 3 systematic uncertainties
+  (signal: pileup, ISR, trigger, JES/JER/MET, E_calo, missing hits, lepton-veto SFs, track
+  reconstruction, MC statistics, lifetime-reweighting method; background: fake-track fit and
+  sample difference, lepton terms, estimate statistics; lumi and cross section) and how they enter
+  the datacards. Built from the Run 2 `DisappTrks/SignalSystematics` and `BackgroundSystematics`
+  code, the dissertation tables the current cards use as placeholders, and the PocketCoffea weight/
+  variation/column machinery; `references/run2-methods.md` has the per-systematic Run 2 recipe,
+  `references/nano-implementation.md` the PocketCoffea mapping.
+- `disapptrks-analysis-note/` -- update the analysis note (AN-24-155) in its Overleaf
+  git clone (`analysis_note/`, gitignored here): sync with co-authors' Overleaf edits,
+  put results in the right section with their provenance, build and visually check the
+  PDF locally, add the changelog entry, commit, and push only when asked (a push goes
+  live for every co-author). `references/sources.md` maps each AN table/figure to the
+  output it came from and its status. Written from the v5 update session (2026-11-03).
