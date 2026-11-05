@@ -67,7 +67,9 @@ over SSH (`lpc-remote-session`, `lpc-crab`), not through a local sshfs mount.
 ## Scratch dirs
 
 `nano_v2_migration_checklist.md` is the living tracking doc for the current
-dev -> dev_v2 migration (per-dataset verification status, validation log). No other
+dev -> dev_v2 migration (per-dataset verification status, validation log).
+`preapproval_checklist.md` tracks the EXO pre-approval checklist (gates, object
+review, blinding), maintained with the root `exo-preapproval` skill. No other
 scratch directories exist in this analysis yet.
 
 ## Reference clones (`ref/`)
